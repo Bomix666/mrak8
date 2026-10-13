@@ -1,0 +1,670 @@
+/* ===========================================================
+   Home — showroom rail and the scroll scenes
+   Scroll-linked scenes read --p (0 → 1), set by js/utils/scroll.js.
+=========================================================== */
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-5);
+  margin-bottom: var(--s-7);
+}
+
+.section-head h2 {
+  font-size: var(--t-h2);
+}
+
+/* ---------------------------------------------------------
+   1. SHOWROOM
+--------------------------------------------------------- */
+.showroom {
+  position: relative;
+  min-height: 100svh;
+  padding-top: var(--header-h);
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.showroom-word {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: min(37vw, 84svh);
+  line-height: 0.74;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: #171717;
+  user-select: none;
+}
+
+.showroom-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--s-4);
+  padding: var(--s-2) var(--edge) 0;
+}
+
+.showroom-top-count {
+  text-align: right;
+}
+
+.showroom-rail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Light. A cone from above that follows the facing garment (--ax). */
+.showroom-rail::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 30% 82% at var(--ax) 0%, rgba(255, 244, 222, 0.2), transparent 72%);
+  transition: --ax var(--d-scene) var(--ease-out);
+  pointer-events: none;
+}
+
+.rail {
+  position: relative;
+  --rail-y: clamp(18px, 4.5svh, 52px);
+  --hook: clamp(30px, 6svh, 62px);
+  /* Wide enough to read, narrow enough that neighbours never touch:
+     the facing garment gets 3.6 slots, an edge-on one needs ~0.28 of its width. */
+  --gw: min(60svh, calc(318vw / (var(--n) + 2.6)), 660px);
+  padding-top: var(--rail-y);
+}
+
+.rail-bar {
+  position: absolute;
+  top: var(--rail-y);
+  left: var(--edge);
+  right: var(--edge);
+  height: 5px;
+  margin-top: -2px;
+  background: linear-gradient(#f4f4f4, #a2a2a2 45%, #4a4a4a);
+}
+
+.rail-bar::before,
+.rail-bar::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  width: 5px;
+  height: 19px;
+  background: linear-gradient(90deg, #dcdcdc, #7c7c7c);
+}
+
+.rail-bar::before { left: 0; }
+.rail-bar::after { right: 0; }
+
+.rail-track {
+  display: flex;
+  height: calc(var(--hook) + var(--gw) * 0.94 + var(--s-4));
+  padding: 0 calc(var(--edge) + 3vw);
+  touch-action: pan-y;
+}
+
+.hanger {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  transition: flex-grow var(--d-scene) var(--ease-out);
+}
+
+.hanger.is-active {
+  flex-grow: 3.6;
+  z-index: 2;
+}
+
+.hanger-body {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--gw);
+  margin-left: calc(var(--gw) / -2);
+  display: block;
+  transform-origin: 50% 0;
+  animation: sway 6s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -1.7s);
+  outline-offset: -6px;
+  /* The slot (.hanger) is the hit area; see rail.js. */
+  pointer-events: none;
+}
+
+.hanger {
+  cursor: pointer;
+}
+
+.hanger.is-active .hanger-body {
+  animation: settle 1.2s var(--ease-out);
+  pointer-events: auto;
+}
+
+@keyframes sway {
+  from { transform: rotate(-0.6deg); }
+  to { transform: rotate(0.6deg); }
+}
+
+@keyframes settle {
+  0% { transform: rotate(2.6deg); }
+  36% { transform: rotate(-1.5deg); }
+  68% { transform: rotate(0.6deg); }
+  100% { transform: rotate(0); }
+}
+
+.hanger-hook {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: calc(var(--hook) + 4px);
+  margin-left: -1px;
+  background: linear-gradient(#e2e2e2, #6f6f6f);
+}
+
+.hanger-hook::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: -10px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #c4c4c4;
+  border-radius: 50%;
+}
+
+.hanger-tag {
+  position: absolute;
+  top: calc(var(--hook) * 0.34);
+  left: calc(50% + 7px);
+  z-index: 3;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.hanger.is-active .hanger-tag {
+  background: var(--signal);
+  color: #fff;
+}
+
+/* Tags on the far side of the facing garment hang on the inside, so the
+   last one never leaves the screen; neighbours alternate height so they
+   stay readable when the slots are tight. */
+.hanger.is-after .hanger-tag {
+  left: auto;
+  right: calc(50% + 7px);
+}
+
+.hanger:nth-child(even):not(.is-active) .hanger-tag {
+  top: calc(var(--hook) * 0.34 + 26px);
+}
+
+.hanger-tag.is-out {
+  background: transparent;
+  color: var(--steel);
+  box-shadow: inset 0 0 0 1px var(--steel);
+  text-decoration: line-through;
+}
+
+/* The garment is a two-faced plane: front photo, back photo. Edge-on by
+   default, it turns to face you when its hanger is active. */
+.garment {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: var(--hook);
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  transform: perspective(1500px) rotateY(var(--ry, 74deg)) scale(var(--sc, 0.9));
+  transition: transform var(--d-scene) var(--ease-out);
+}
+
+.hanger.is-before .garment { --ry: 74deg; }
+.hanger.is-after .garment { --ry: -74deg; }
+
+.hanger.is-active .garment {
+  --ry: var(--tilt, 0deg);
+  --sc: 1;
+}
+
+.hanger.is-active.is-flipped .garment {
+  --ry: calc(180deg + var(--tilt, 0deg));
+}
+
+.garment-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  backface-visibility: hidden;
+  filter: brightness(0.46) saturate(0.85);
+  transition: filter var(--d-slow) var(--ease-out);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.garment-back {
+  transform: rotateY(180deg);
+}
+
+.hanger.is-active .garment-face {
+  filter: none;
+}
+
+.garment--empty {
+  color: var(--steel);
+}
+
+.garment--empty svg {
+  display: block;
+  width: 64%;
+  height: 13%;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.hanger.is-active .garment--empty {
+  color: var(--bone);
+}
+
+/* caption / controls */
+.rail-foot {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: var(--s-5);
+  padding: var(--s-4) var(--edge) var(--s-5);
+}
+
+.rail-caption {
+  display: grid;
+  gap: 6px;
+  min-height: 5.6rem;
+  align-content: end;
+}
+
+.rail-caption-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.7rem, 3.2vw, 2.8rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.rail-caption-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 1.6em;
+  color: var(--fg);
+}
+
+.rail-caption-meta .red {
+  color: var(--accent-text);
+}
+
+.rail-controls {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.rail-btn {
+  min-width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  color: var(--fg);
+  font-size: 1.05rem;
+  transition: background var(--d-fast), color var(--d-fast), border-color var(--d-fast);
+}
+
+.rail-btn--text {
+  padding: 0 18px;
+}
+
+.rail-btn:hover:not(:disabled) {
+  background: var(--bone);
+  color: var(--ink);
+}
+
+.rail-btn[aria-pressed='true'] {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+.rail-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rail-aside {
+  justify-self: end;
+  display: grid;
+  justify-items: end;
+  gap: var(--s-1);
+  text-align: right;
+}
+
+.showroom-still {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--s-4);
+  padding: var(--s-6) var(--edge);
+}
+
+.showroom-still img {
+  width: min(62svh, 86vw);
+  mix-blend-mode: lighten;
+}
+
+/* ---------------------------------------------------------
+   2. STATEMENT — the print, at the size of the page
+--------------------------------------------------------- */
+.statement {
+  --p: 0.5;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--s-4);
+  padding: var(--s-9) var(--edge);
+  overflow: clip;
+}
+
+.statement-kicker {
+  grid-column: 1 / -1;
+  margin-bottom: var(--s-4);
+}
+
+.statement-title {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  font-size: clamp(5.4rem, 25.5vw, 31rem);
+  line-height: 0.76;
+  color: var(--signal);
+  white-space: nowrap;
+}
+
+.statement-title span:first-child {
+  transform: translateX(calc((var(--p) - 0.5) * 12vw));
+}
+
+.statement-title span:last-child {
+  transform: translateX(calc((0.5 - var(--p)) * 7vw));
+}
+
+.statement-object {
+  grid-column: 6 / 13;
+  grid-row: 2;
+  z-index: 2;
+  align-self: center;
+  justify-self: center;
+  width: min(46vw, 780px);
+  transform: translateY(calc((0.5 - var(--p)) * 26vh)) rotate(calc((var(--p) - 0.5) * 16deg));
+  filter: drop-shadow(0 44px 46px rgba(0, 0, 0, 0.3));
+  will-change: transform;
+}
+
+.statement-object img {
+  width: 100%;
+}
+
+/* ---------------------------------------------------------
+   3. FILM — three vertical frames lock into a triptych
+--------------------------------------------------------- */
+.film {
+  --p: 0;
+  position: relative;
+  height: 230vh;
+}
+
+.film-stage {
+  /* k: 0 → 1 over the first two thirds of the pin, then holds */
+  --k: min(1, calc(var(--p) * 1.5));
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: #000;
+}
+
+.film-panel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  background: #050505;
+  will-change: transform;
+}
+
+.film-panel video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.film-panel--c {
+  z-index: 2;
+  transform: translateX(-50%) scale(calc(0.66 + var(--k) * 0.34));
+}
+
+.film-panel--l {
+  transform: translateX(calc(-150% - 2px - (1 - var(--k)) * 46vw));
+  opacity: var(--k);
+}
+
+.film-panel--r {
+  transform: translateX(calc(50% + 2px + (1 - var(--k)) * 46vw));
+  opacity: var(--k);
+}
+
+/* Centred: on screens narrower than the triptych the outer frames are
+   cropped at the sides, and a corner label would be cropped with them. */
+.film-cam {
+  position: absolute;
+  top: calc(var(--header-h) + var(--s-2));
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.film-stage::after {
+  content: '';
+  position: absolute;
+  inset: 40% 0 0 0;
+  z-index: 3;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.78));
+  pointer-events: none;
+}
+
+.film-hud {
+  position: absolute;
+  top: calc(var(--header-h) + var(--s-2));
+  right: var(--edge);
+  z-index: 4;
+  display: flex;
+  gap: 1.4em;
+  color: var(--bone);
+}
+
+.film-rec::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 0.7em;
+  border-radius: 50%;
+  background: var(--signal);
+  animation: rec 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes rec {
+  to { opacity: 0.15; }
+}
+
+.film-title {
+  position: absolute;
+  left: var(--edge);
+  right: var(--edge);
+  bottom: var(--s-6);
+  z-index: 4;
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  color: var(--bone);
+}
+
+.film-title .mono {
+  color: var(--bone);
+}
+
+.film-title h2 {
+  font-size: var(--t-h1);
+  transform: translateY(calc((1 - var(--k)) * 40px));
+}
+
+/* ---------------------------------------------------------
+   Narrow screens — recomposed, not shrunk
+--------------------------------------------------------- */
+@media (max-width: 860px) {
+  .showroom-top {
+    grid-template-columns: 1fr auto;
+  }
+
+  .showroom-top > :first-child {
+    display: none;
+  }
+
+  /* One garment faces you; the rest of the run is a dense rack at the edges. */
+  .rail {
+    /* 80vw, not more: the edge-on neighbours must stay visible and tappable. */
+    --gw: min(80vw, 50svh);
+    --hook: clamp(52px, 11svh, 110px);
+  }
+
+  .rail-track {
+    padding: 0 var(--edge);
+  }
+
+  .hanger {
+    flex-grow: 0.42;
+  }
+
+  .hanger.is-active {
+    flex-grow: 5;
+  }
+
+  .rail-foot {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .rail-caption {
+    grid-column: 1 / -1;
+    min-height: 0;
+  }
+
+  .rail-aside {
+    justify-items: end;
+  }
+
+  .rail-hint {
+    display: none;
+  }
+
+  .statement {
+    padding-block: var(--s-8);
+  }
+
+  .statement-object {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 82vw;
+    margin-top: -14vw;
+  }
+
+  
+
+  
+
+  /* No pin on phones: one full-bleed vertical film, nothing else to load. */
+  .film {
+    height: auto;
+  }
+
+  .film-stage {
+    --k: 1;
+    position: relative;
+  }
+
+  .film-panel--c {
+    left: 0;
+    width: 100%;
+    aspect-ratio: auto;
+    transform: none;
+  }
+
+  .film-panel--l,
+  .film-panel--r {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hanger-body {
+    animation: none !important;
+  }
+
+  /* Scroll-linked motion settles into its resting composition. */
+  .statement{
+    --p: 0.5 !important;
+  }
+
+  .film {
+    height: auto;
+  }
+
+  .film-stage {
+    --k: 1;
+    position: relative;
+  }
+}
+
+/* statement is just the print and the garment now */
+.statement-link {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: start;
+  margin-top: var(--s-6);
+}
+
+@media (max-width: 860px) {
+  .statement-link {
+    grid-row: 4;
+  }
+}
