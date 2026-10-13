@@ -1,0 +1,9 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div class="mrak8-dashboard-banner">
+  <span>MRAK8 CONTROL / OVERVIEW</span>
+  <a href="{% url 'mrak8-dashboard' %}">OPEN DASHBOARD →</a>
+</div>
+{{ block.super }}
+{% endblock %}

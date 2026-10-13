@@ -1,0 +1,62 @@
+{% load static %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ meta.title }}</title>
+  <meta name="description" content="{{ meta.description }}" />
+  {% if meta.noindex %}<meta name="robots" content="noindex" />{% endif %}
+  <link rel="canonical" href="{{ meta.url }}" />
+  <meta property="og:site_name" content="MRAK8" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:type" content="{{ meta.type }}" />
+  <meta property="og:title" content="{{ meta.title }}" />
+  <meta property="og:description" content="{{ meta.description }}" />
+  <meta property="og:url" content="{{ meta.url }}" />
+  <meta property="og:image" content="{{ meta.image }}" />
+  {% if meta.price %}
+  <meta property="product:price:amount" content="{{ meta.price }}" />
+  <meta property="product:price:currency" content="{{ currency }}" />
+  {% endif %}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#0b0b0b" />
+  <link rel="icon" href="{{ site }}assets/favicon.svg" type="image/svg+xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&family=Sofia+Sans+Extra+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ site }}css/base.css" />
+  <link rel="stylesheet" href="{{ site }}css/chrome.css" />
+  <link rel="stylesheet" href="{{ site }}css/home.css" />
+  <link rel="stylesheet" href="{{ site }}css/shop.css" />
+  <link rel="stylesheet" href="{{ site }}css/journal.css" />
+  {% if structured %}<script type="application/ld+json">{{ structured }}</script>{% endif %}
+</head>
+<body data-static="{{ site }}" data-currency="{{ currency }}"{% if export %} data-mode="static" data-base="{{ base }}" data-api="{{ base }}/data"{% endif %}>
+  <a class="skip-link" href="#view-root">К содержанию</a>
+  <div id="header-root"></div>
+
+  <main id="view-root" tabindex="-1">
+    <noscript>
+      <section class="noscript">
+        <p class="mono">MRAK8</p>
+        {% if noscript %}
+        <h1>{{ noscript.heading }}</h1>
+        {% for line in noscript.lines %}{% if line %}<p>{{ line }}</p>{% endif %}{% endfor %}
+        {% else %}
+        <h1>{{ meta.title }}</h1>
+        <p>{{ meta.description }}</p>
+        {% endif %}
+        <p>Магазин и журнал работают на JavaScript — включите его, чтобы выбрать размер и оформить заказ.</p>
+        <p><a href="{{ base }}/shop/">Shop</a> · <a href="{{ base }}/journal/">Journal</a> · <a href="{{ base }}/about/">About</a> · <a href="{{ base }}/contact/">Контакты</a></p>
+      </section>
+    </noscript>
+  </main>
+
+  <div id="footer-root"></div>
+  <div id="cart-root"></div>
+
+  <script type="module" src="{{ site }}js/app.js"></script>
+</body>
+</html>

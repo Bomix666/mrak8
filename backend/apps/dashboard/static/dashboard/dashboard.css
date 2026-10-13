@@ -1,0 +1,120 @@
+.mrak8-dash {
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+  color: #edebe6;
+}
+
+.mrak8-dash h2 {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a85;
+  margin: 0 0 14px;
+  border-bottom: 1px solid #2a2a28;
+  padding-bottom: 8px;
+}
+
+.mrak8-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #2a2a28;
+  border: 1px solid #2a2a28;
+  margin-bottom: 20px;
+}
+
+.mrak8-stat {
+  background: #0a0a0a;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mrak8-stat-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: #8a8a85;
+}
+
+.mrak8-stat-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.mrak8-stat-warn .mrak8-stat-value { color: #d4a017; }
+.mrak8-stat-danger .mrak8-stat-value { color: #b23c3c; }
+
+.mrak8-dash-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.mrak8-dash-panel {
+  background: #0a0a0a;
+  border: 1px solid #2a2a28;
+  padding: 18px;
+}
+
+.mrak8-order-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.mrak8-order-table th {
+  text-align: left;
+  color: #8a8a85;
+  font-weight: 500;
+  padding: 6px 8px;
+  border-bottom: 1px solid #2a2a28;
+}
+
+.mrak8-order-table td {
+  padding: 8px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.mrak8-order-table a {
+  color: #edebe6;
+}
+
+.mrak8-order-status {
+  padding: 2px 6px;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  border: 1px solid #2a2a28;
+}
+
+.mrak8-status-paid, .mrak8-status-processing, .mrak8-status-packed { color: #2e7d32; }
+.mrak8-status-payment_pending { color: #d4a017; }
+.mrak8-status-shipped, .mrak8-status-delivered { color: #4a90d9; }
+.mrak8-status-cancelled, .mrak8-status-refunded { color: #b23c3c; }
+
+.mrak8-flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.78rem;
+}
+
+.mrak8-flag-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.mrak8-flag-list a {
+  color: #edebe6;
+}
+
+.mrak8-flag-list span {
+  color: #8a8a85;
+}
+
+@media (max-width: 900px) {
+  .mrak8-dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .mrak8-dash-row { grid-template-columns: 1fr; }
+}

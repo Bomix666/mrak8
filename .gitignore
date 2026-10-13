@@ -1,0 +1,4 @@
+# Shoot originals stay local (large; the web-ready versions are in the repo).
+/*.JPG
+/*.jpg
+/*.mp4

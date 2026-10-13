@@ -1,0 +1,11 @@
+Django==5.0.6
+djangorestframework==3.15.1
+django-cors-headers==4.3.1
+python-dotenv==1.0.1
+Pillow==10.3.0
+
+# Uncomment when moving to PostgreSQL:
+# psycopg2-binary==2.9.9
+
+# Uncomment when wiring a real Russian payment provider:
+# yookassa==3.1.0

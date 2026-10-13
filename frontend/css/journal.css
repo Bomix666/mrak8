@@ -1,0 +1,482 @@
+/* ===========================================================
+   Journal — index, entry (CMS blocks), about
+=========================================================== */
+
+/* ---------- index ----------
+   12 columns, dense flow. Each tile spans according to its cover's own
+   shape (set in journalCard.js): tall and square take 4, wide takes 8 —
+   so any mix packs into full rows. */
+.journal {
+  padding-bottom: var(--s-9);
+}
+
+.jgrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--s-8) var(--s-4);
+  align-items: end;
+  grid-auto-flow: dense;
+  padding: var(--s-7) var(--edge) 0;
+}
+
+.jgrid--row {
+  padding: 0;
+  align-items: start;
+}
+
+.jcard {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.jcard--tall,
+.jcard--square { grid-column: span 4; }
+.jcard--wide { grid-column: span 8; }
+
+/* Break the rows: every other tile sits higher than its neighbours. */
+.jgrid:not(.jgrid--row) .jcard:nth-of-type(even) {
+  margin-bottom: var(--s-8);
+}
+
+.jcard-media {
+  display: block;
+}
+
+.jcard-media img,
+.jcard-media video {
+  transition: transform var(--d-scene) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .jcard-media:hover img,
+  .jcard-media:hover video {
+    transform: scale(1.04);
+  }
+}
+
+.jcard-info {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.jcard-title {
+  font-size: clamp(2rem, 4.4vw, 4.4rem);
+}
+
+.jcard-title a {
+  transition: color var(--d-fast);
+}
+
+.jcard-title a:hover {
+  color: var(--signal);
+}
+
+.jcard-info p {
+  color: var(--muted);
+  max-width: 40ch;
+}
+
+/* ---------- entry ---------- */
+.entry-draft {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  padding: var(--s-3) var(--edge);
+  background: var(--signal);
+  color: #fff;
+  text-align: center;
+}
+
+.entry-hero {
+  position: relative;
+}
+
+.entry-hero-text {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+}
+
+.entry-hero h1 {
+  font-size: var(--t-h1);
+}
+
+.entry-hero .lede {
+  color: var(--muted);
+}
+
+/* Wide cover: full-bleed, title over the lower edge. */
+.entry-hero--bleed .entry-hero-media {
+  height: min(92svh, 62vw);
+  min-height: 420px;
+}
+
+.entry-hero--bleed .entry-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 45% 0 0 0;
+  background: linear-gradient(transparent, var(--ink));
+}
+
+.entry-hero--bleed .entry-hero-text {
+  position: relative;
+  margin-top: calc(var(--t-h1) * -0.62);
+  padding: 0 var(--edge);
+}
+
+/* Vertical cover: the film stands beside the title instead of under it. */
+.entry-hero--split {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--s-6);
+  align-items: end;
+  min-height: 100svh;
+  padding: calc(var(--header-h) + var(--s-5)) var(--edge) var(--s-6);
+}
+
+.entry-hero--split .entry-hero-media {
+  order: 2;
+  justify-self: end;
+  height: calc(100svh - var(--header-h) - var(--s-8));
+  max-width: 100%;
+  aspect-ratio: 9 / 16;
+}
+
+/* ---------- entry blocks ---------- */
+.entry-body {
+  display: grid;
+  gap: var(--s-8);
+  padding: var(--s-9) 0;
+}
+
+.block--wide,
+.block--half,
+.block--text,
+.block--quote {
+  width: var(--col);
+  margin-inline: auto;
+}
+
+.block-media {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.block-media img,
+.block-media video {
+  width: 100%;
+  background: #000;
+}
+
+.block-media figcaption {
+  padding-inline: 0;
+}
+
+.block--full .block-media figcaption {
+  padding-inline: var(--edge);
+}
+
+/* A film block never grows taller than the screen it plays on. */
+.block-media video {
+  max-height: 92svh;
+  object-fit: contain;
+}
+
+.block--wide .block-media video {
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.block--half {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+/* collage: the second frame of a pair sits lower */
+.block--half > :nth-child(even) {
+  margin-top: var(--s-9);
+}
+
+.block--strip {
+  display: flex;
+  gap: var(--s-3);
+  padding-inline: var(--edge);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  overscroll-behavior-x: contain;
+}
+
+.block--strip > * {
+  flex: 0 0 min(44vw, 720px);
+  scroll-snap-align: center;
+}
+
+.block--text {
+  display: grid;
+  gap: var(--s-4);
+  max-width: var(--measure);
+  font-size: 1.1875rem;
+  line-height: 1.55;
+}
+
+.block--quote {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.block--quote p {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3rem, 10.5vw, 10.5rem);
+  line-height: 0.82;
+  text-transform: uppercase;
+  color: var(--signal);
+  text-wrap: balance;
+}
+
+.entry-products {
+  padding: var(--s-9) var(--edge);
+}
+
+.entry-next {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-8) var(--edge) var(--s-9);
+  border-top: 1px solid var(--line);
+}
+
+.entry-next-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--t-h1);
+  line-height: 0.84;
+  text-transform: uppercase;
+  transition: color var(--d-fast), transform var(--d-slow) var(--ease-out);
+}
+
+.entry-next:hover .entry-next-title {
+  color: var(--signal);
+  transform: translateX(1.6vw);
+}
+
+/* ---------- about ---------- */
+.about-hero {
+  display: grid;
+  gap: var(--s-5);
+  padding-inline: var(--edge);
+  padding-bottom: var(--s-8);
+}
+
+.about-title {
+  font-size: clamp(5.4rem, 25.5vw, 31rem);
+  line-height: 0.76;
+  color: var(--signal);
+}
+
+.about-hero .lede {
+  justify-self: end;
+}
+
+.about-lines {
+  --p: 0.5;
+  position: relative;
+  min-height: 120svh;
+  display: grid;
+  align-items: center;
+  padding: var(--s-9) var(--edge);
+  overflow: clip;
+}
+
+.about-lines-visual {
+  position: absolute;
+  top: 50%;
+  /* far enough right that the garment never sits under the lines of text */
+  right: -24vw;
+  width: min(70vw, 120svh);
+  transform: translateY(-50%) rotate(calc(6deg - var(--p) * 8deg)) scale(calc(0.94 + var(--p) * 0.2));
+  mix-blend-mode: lighten;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.about-lines-list {
+  position: relative;
+  display: grid;
+  gap: var(--s-7);
+}
+
+.about-lines-list li {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.about-lines-list strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.8rem, 9.4vw, 9.4rem);
+  line-height: 0.82;
+  text-transform: uppercase;
+  max-width: 12ch;
+}
+
+.about-lines-list li:nth-child(n + 2) strong {
+  color: var(--signal);
+}
+
+.about-marks {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--s-7);
+  align-items: start;
+  padding: var(--s-9) var(--edge);
+}
+
+.about-figure img {
+  width: 100%;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(ellipse 72% 76% at 50% 46%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 76% at 50% 46%, #000 62%, transparent 100%);
+}
+
+.about-marks-text {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.about-facts {
+  border-bottom: 1px solid var(--line);
+}
+
+.about-facts > div {
+  display: grid;
+  grid-template-columns: 9em 1fr;
+  gap: var(--s-4);
+  align-items: baseline;
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line);
+  font-size: 1.25rem;
+}
+
+.about-stitch {
+  width: clamp(150px, 20vw, 260px);
+  justify-self: end;
+  display: grid;
+  gap: var(--s-2);
+}
+
+.about-stitch .media {
+  aspect-ratio: 9 / 16;
+}
+
+.about-out {
+  padding: var(--s-7) var(--edge) 0;
+}
+
+.about-out-link {
+  display: grid;
+  grid-template-columns: 4em 1fr;
+  align-items: baseline;
+  padding: var(--s-3) 0;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--t-h2);
+  line-height: 0.9;
+  text-transform: uppercase;
+  transition: color var(--d-fast), padding-left var(--d-slow) var(--ease-out);
+}
+
+.about-out-link:hover {
+  color: var(--signal);
+  padding-left: 1.6vw;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 860px) {
+  .jgrid {
+    gap: var(--s-7) var(--s-4);
+  }
+
+  .jcard--tall { grid-column: span 6; }
+
+  .jcard--square,
+  .jcard--wide {
+    grid-column: 1 / -1;
+  }
+
+  .jgrid:not(.jgrid--row) .jcard:nth-of-type(even) {
+    margin-bottom: 0;
+  }
+
+  .entry-hero--split {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 0 0 var(--s-6);
+  }
+
+  .entry-hero--split .entry-hero-media {
+    order: 0;
+    width: 100%;
+    height: auto;
+    max-height: 92svh;
+  }
+
+  .entry-hero--split .entry-hero-text {
+    padding: 0 var(--edge);
+  }
+
+  .entry-body {
+    gap: var(--s-7);
+    padding: var(--s-8) 0;
+  }
+
+  .block--half {
+    gap: var(--s-2);
+  }
+
+  .block--half > :nth-child(even) {
+    margin-top: var(--s-7);
+  }
+
+  .block--strip > * {
+    flex-basis: 84vw;
+  }
+
+  .about-hero .lede {
+    justify-self: start;
+  }
+
+  .about-lines {
+    min-height: 0;
+  }
+
+  .about-lines-visual {
+    width: 120vw;
+    right: -40vw;
+    opacity: 0.4;
+  }
+
+  .about-marks {
+    grid-template-columns: 1fr;
+  }
+
+  .about-facts > div {
+    grid-template-columns: 6.5em 1fr;
+    font-size: 1.0625rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .jcard--tall { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-lines {
+    --p: 0.5 !important;
+  }
+}

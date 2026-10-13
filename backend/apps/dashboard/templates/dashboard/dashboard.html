@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard | MRAK8 CONTROL{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mrak8-dash">
+
+  <div class="mrak8-dash-stats">
+    <div class="mrak8-stat">
+      <span class="mrak8-stat-label">TOTAL SALES (PAID)</span>
+      <span class="mrak8-stat-value">{{ total_sales }} {{ currency }}</span>
+    </div>
+    <div class="mrak8-stat">
+      <span class="mrak8-stat-label">ORDERS</span>
+      <span class="mrak8-stat-value">{{ orders_count }}</span>
+    </div>
+    <div class="mrak8-stat">
+      <span class="mrak8-stat-label">PENDING PAYMENT</span>
+      <span class="mrak8-stat-value">{{ pending_orders }}</span>
+    </div>
+    <div class="mrak8-stat">
+      <span class="mrak8-stat-label">PAID ORDERS</span>
+      <span class="mrak8-stat-value">{{ paid_orders_count }}</span>
+    </div>
+    <div class="mrak8-stat">
+      <span class="mrak8-stat-label">PRODUCTS</span>
+      <span class="mrak8-stat-value">{{ products_count }}</span>
+    </div>
+    <div class="mrak8-stat mrak8-stat-warn">
+      <span class="mrak8-stat-label">LOW STOCK</span>
+      <span class="mrak8-stat-value">{{ low_stock|length }}</span>
+    </div>
+    <div class="mrak8-stat mrak8-stat-danger">
+      <span class="mrak8-stat-label">SOLD OUT</span>
+      <span class="mrak8-stat-value">{{ sold_out|length }}</span>
+    </div>
+  </div>
+
+  <div class="mrak8-dash-row">
+    <div class="mrak8-dash-panel mrak8-dash-chart">
+      <h2>SALES / LAST 14 DAYS</h2>
+      <canvas id="salesChart" height="90"></canvas>
+    </div>
+
+    <div class="mrak8-dash-panel">
+      <h2>RECENT ORDERS</h2>
+      <table class="mrak8-order-table">
+        <thead>
+          <tr><th>ORDER</th><th>ITEMS</th><th>STATUS</th><th>TOTAL</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td><a href="{% url 'admin:orders_order_change' order.id %}">#{{ order.order_number }}</a></td>
+            <td>
+              {% for item in order.items.all %}{{ item.product_name }} / {{ item.size }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </td>
+            <td><span class="mrak8-order-status mrak8-status-{{ order.status|lower }}">{{ order.get_status_display }}</span></td>
+            <td>{{ order.currency }} {{ order.total }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">NO ORDERS YET.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if low_stock or sold_out %}
+  <div class="mrak8-dash-row">
+    {% if low_stock %}
+    <div class="mrak8-dash-panel">
+      <h2>LOW STOCK</h2>
+      <ul class="mrak8-flag-list">
+        {% for p in low_stock %}
+        <li><a href="{% url 'admin:catalog_product_change' p.id %}">{{ p.code }} — {{ p.name }}</a><span>{{ p.total_stock }} left</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% if sold_out %}
+    <div class="mrak8-dash-panel">
+      <h2>SOLD OUT</h2>
+      <ul class="mrak8-flag-list">
+        {% for p in sold_out %}
+        <li><a href="{% url 'admin:catalog_product_change' p.id %}">{{ p.code }} — {{ p.name }}</a><span>0 left</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+  const ctx = document.getElementById('salesChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|safe }},
+      datasets: [{
+        data: {{ chart_values|safe }},
+        borderColor: '#edebe6',
+        backgroundColor: 'rgba(237,235,230,0.08)',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.25,
+        fill: true,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2a2a28' }, ticks: { color: '#8a8a85', font: { family: 'IBM Plex Mono', size: 10 } } },
+        y: { grid: { color: '#2a2a28' }, ticks: { color: '#8a8a85', font: { family: 'IBM Plex Mono', size: 10 } } },
+      },
+    },
+  });
+</script>
+{% endblock %}

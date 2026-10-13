@@ -1,0 +1,72 @@
+:root {
+  --mrak8-black: #0a0a0a;
+  --mrak8-surface: #131313;
+  --mrak8-white: #edebe6;
+  --mrak8-grey: #8a8a85;
+  --mrak8-line: #2a2a28;
+  --mrak8-accent: #b23c3c;
+}
+
+#header {
+  background: var(--mrak8-black);
+  color: var(--mrak8-white);
+  border-bottom: 1px solid var(--mrak8-line);
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+  color: var(--mrak8-white);
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background: var(--mrak8-black);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+div.breadcrumbs {
+  background: var(--mrak8-surface);
+  color: var(--mrak8-grey);
+  border-bottom: 1px solid var(--mrak8-line);
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: var(--mrak8-black);
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+}
+
+.button.default, input[type=submit].default {
+  background: var(--mrak8-black);
+}
+
+a:link, a:visited {
+  color: #2b4a6b;
+}
+
+.mrak8-dashboard-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--mrak8-black);
+  color: var(--mrak8-white);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--mrak8-line);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mrak8-dashboard-banner a {
+  color: var(--mrak8-white);
+  border-bottom: 1px solid var(--mrak8-white);
+}
