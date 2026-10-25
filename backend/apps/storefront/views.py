@@ -11,6 +11,7 @@ All of it is read from the database. Nothing here invents catalogue data.
 """
 
 import json
+from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.shortcuts import render
@@ -23,6 +24,19 @@ from apps.catalog.models import VISIBLE_STATUSES, Product
 from apps.journal.models import Entry
 
 SITE_NAME = 'MRAK8'
+
+# Drops are announced in Moscow time, like the Telegram bot does.
+DROP_TZ = ZoneInfo('Europe/Moscow')
+MONTHS = ('января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+          'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря')
+
+
+def drop_line(item):
+    """'Дроп 12 декабря, 19:00 МСК.' — only while the drop is still ahead."""
+    if not (item.is_drop_pending and item.drop_at):
+        return ''
+    at = item.drop_at.astimezone(DROP_TZ)
+    return f'Дроп {at.day} {MONTHS[at.month - 1]}, {at:%H:%M} МСК.'
 
 PAGES = {
     'home': {
@@ -100,13 +114,18 @@ def product(request, slug):
     if item is None:
         return not_found(request)
 
-    images = [request.build_absolute_uri(img.image.url) for img in item.images.all()]
-    description = Truncator(item.description).chars(200)
+    # The link preview shows the front of the thing, not a detail shot.
+    ordered = sorted(item.images.all(), key=lambda img: img.angle not in ('main', 'front'))
+    images = [request.build_absolute_uri(img.image.url) for img in ordered]
+    drop = drop_line(item)
+    description = Truncator(' '.join(filter(None, (drop, item.description)))).chars(200)
+    availability = {'soon': 'preorder', 'live': 'instock'}.get(item.drop_state, 'oos')
     meta = {
         'title': f'{item.name} — {SITE_NAME}',
         'description': description,
         'type': 'product',
         'price': str(item.current_price),  # str: templates would localise a Decimal to "120,00"
+        'availability': availability,
     }
     if images:
         meta['image'] = images[0]
@@ -133,7 +152,7 @@ def product(request, slug):
         structured['offers']['availabilityStarts'] = item.drop_at.isoformat()
     noscript = {
         'heading': item.name,
-        'lines': [item.color, f'{item.current_price} {settings.SHOP_CURRENCY}', item.description],
+        'lines': [item.color, f'{item.current_price} {settings.SHOP_CURRENCY}', drop, item.description],
     }
     return _shell(request, meta, noscript=noscript, structured=structured)
 

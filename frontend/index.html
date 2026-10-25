@@ -18,7 +18,11 @@
   <meta property="product:price:amount" content="{{ meta.price }}" />
   <meta property="product:price:currency" content="{{ currency }}" />
   {% endif %}
+  {% if meta.availability %}<meta property="product:availability" content="{{ meta.availability }}" />{% endif %}
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ meta.title }}" />
+  <meta name="twitter:description" content="{{ meta.description }}" />
+  <meta name="twitter:image" content="{{ meta.image }}" />
   <meta name="theme-color" content="#0b0b0b" />
   <link rel="icon" href="{{ site }}assets/favicon.svg" type="image/svg+xml" />
 

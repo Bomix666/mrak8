@@ -33,6 +33,23 @@ class ShellTests(TestCase):
         # Catalogue text is escaped both in the markup and inside the JSON-LD.
         self.assertNotIn('<b>вещи</b>', html)
 
+    def test_pending_drop_announces_its_date_in_moscow_time(self):
+        from datetime import datetime, timezone
+        self.product.status = 'drop'
+        self.product.drop_at = datetime(2030, 12, 12, 16, 0, tzinfo=timezone.utc)
+        self.product.save()
+        html = self.client.get('/product/zip-hoodie-test/').content.decode()
+        self.assertIn('content="Дроп 12 декабря, 19:00 МСК. Описание', html)
+        self.assertIn('property="product:availability" content="preorder"', html)
+        self.assertIn('"availabilityStarts": "2030-12-12T16:00:00+00:00"', html)
+
+        self.product.drop_at = None
+        self.product.status = 'active'
+        self.product.save()
+        html = self.client.get('/product/zip-hoodie-test/').content.decode()
+        self.assertNotIn('Дроп', html)
+        self.assertIn('content="oos"', html)  # no stock rows in this fixture
+
     def test_unknown_and_unpublished_things_are_real_404s(self):
         for path in ('/product/nope/', '/journal/nope/', '/journal/draft/', '/no/such/page/'):
             self.assertEqual(self.client.get(path).status_code, 404, path)
