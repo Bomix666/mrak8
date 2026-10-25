@@ -1153,3 +1153,124 @@
   color: var(--muted);
   font-size: var(--t-small);
 }
+
+/* ---- Evidence card: ФАС / СПИНА flip, scanner, loupe (mini app fx) ---- */
+.evidence {
+  position: relative;
+  perspective: 1600px;
+  background: var(--mrak-black, #0b0b0b);
+  cursor: pointer;
+}
+
+.evidence-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--ease-snap);
+}
+
+.evidence.is-back .evidence-card {
+  transform: rotateY(180deg);
+}
+
+.evidence-side {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.evidence-side--back {
+  transform: rotateY(180deg);
+}
+
+.evidence-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evidence-scan {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--signal);
+  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--signal) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.evidence.is-scanning .evidence-scan {
+  animation: evidence-scan 1100ms linear 1;
+}
+
+@keyframes evidence-scan {
+  0% { transform: translateY(0); opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translateY(100cqh); opacity: 0; }
+}
+
+.evidence {
+  container-type: size;
+}
+
+.evidence-lens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 168px;
+  height: 168px;
+  border: 1px solid var(--bone);
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 0 1px var(--ink), 0 12px 32px rgb(0 0 0 / .45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.evidence.is-loupe .evidence-lens {
+  opacity: 1;
+}
+
+.evidence.is-loupe {
+  cursor: zoom-in;
+}
+
+.evidence-switch {
+  position: absolute;
+  left: var(--s-3);
+  /* the lead runs up under the header on desktop and is taller than the screen */
+  top: calc(var(--header-h) + var(--s-3));
+  display: flex;
+  border: 1px solid var(--bone);
+  background: rgb(11 11 11 / .7);
+}
+
+.evidence-switch button {
+  min-height: var(--tap, 44px);
+  padding: 0 14px;
+  color: var(--bone);
+  font: inherit;
+  letter-spacing: var(--track-mono, .08em);
+  text-transform: uppercase;
+}
+
+.evidence-switch button[aria-pressed="true"] {
+  background: var(--bone);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evidence-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .evidence-switch {
+    top: auto;
+    bottom: var(--s-3);
+    left: var(--edge);
+  }
+}
