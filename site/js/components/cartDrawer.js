@@ -1,5 +1,7 @@
 import { getCart, setQty, removeFromCart, clearCart, subscribe } from '../state/cart.js';
-import { formatPrice, esc } from '../utils/format.js';
+import { formatPrice, esc, pad } from '../utils/format.js';
+import { navigate } from '../router.js';
+import { reduced, buzz } from '../utils/fx.js';
 
 let drawerEl = null;
 let lastFocus = null;
@@ -8,11 +10,15 @@ export function mountCartDrawer(root) {
   root.innerHTML = `
     <div class="cart-drawer" data-cart-drawer>
       <div class="cart-overlay" data-cart-close></div>
-      <aside class="cart-panel" data-theme="paper" role="dialog" aria-modal="true" aria-label="Корзина">
+      <aside class="cart-panel" data-theme="paper" role="dialog" aria-modal="true" aria-label="Пакет для улик">
         <div class="cart-head">
-          <h2>Корзина</h2>
+          <div>
+            <span class="mono cart-kicker">Personal property · опись</span>
+            <h2>Пакет</h2>
+          </div>
           <button class="nav-btn" data-cart-close>Закрыть</button>
         </div>
+        <div class="zip" aria-hidden="true"><div class="zip__teeth"></div><div class="zip__pull" data-zip-pull></div></div>
         <div class="cart-body" data-cart-body></div>
         <div class="cart-foot" data-cart-foot></div>
       </aside>
@@ -48,8 +54,10 @@ export function mountCartDrawer(root) {
       body.innerHTML = `
         ${noticeHtml}
         <div class="cart-empty">
-          <p>Пока<br />пусто</p>
-          <a class="link" href="/shop/">В магазин</a>
+          <span class="cart-empty-bag mono" aria-hidden="true">Evidence</span>
+          <p>Изъятых вещей нет.</p>
+          <span class="cart-empty-sub">Подозрительно.</span>
+          <a class="link" href="/shop/">К вещдокам</a>
         </div>`;
       foot.hidden = true;
       return;
@@ -66,15 +74,15 @@ export function mountCartDrawer(root) {
         </a>
         <div class="cart-line-info">
           <div class="cart-line-top">
-            <a href="/product/${esc(item.slug)}/">${esc(item.name)}</a>
+            <a href="/product/${esc(item.slug)}/"><span class="cart-line-n mono">${pad(i + 1)}.</span> ${esc(item.name)}</a>
             <span class="cart-line-price">${formatPrice(item.price * item.qty)}</span>
           </div>
-          <span class="mono">${esc(item.color)} / размер ${esc(item.size)}</span>
+          <span class="mono">Вещдок ${esc(item.code || '')} · ${esc(item.color)} · ${item.size === 'OS' ? 'one size' : `размер ${esc(item.size)}`}</span>
           <div class="cart-line-controls">
             <button class="qty-btn" data-qty-down aria-label="Уменьшить количество: ${esc(item.name)}">−</button>
             <span class="qty-value" aria-label="Количество">${item.qty}</span>
             <button class="qty-btn" data-qty-up aria-label="Увеличить количество: ${esc(item.name)}" ${item.qty >= item.limit ? 'disabled' : ''}>+</button>
-            <button class="cart-remove mono" data-remove>Удалить</button>
+            <button class="cart-remove mono" data-remove aria-label="Вернуть субъекту: ${esc(item.name)}">Вернуть</button>
           </div>
         </div>
       </div>`
@@ -85,22 +93,35 @@ export function mountCartDrawer(root) {
       const item = items[Number(lineEl.dataset.index)];
       lineEl.querySelector('[data-qty-up]').addEventListener('click', () => setQty(item.id, item.size, item.qty + 1));
       lineEl.querySelector('[data-qty-down]').addEventListener('click', () => setQty(item.id, item.size, item.qty - 1));
-      lineEl.querySelector('[data-remove]').addEventListener('click', () => removeFromCart(item.id, item.size));
+      // Struck through in red marker first, then returned.
+      lineEl.querySelector('[data-remove]').addEventListener('click', () => {
+        lineEl.classList.add('is-struck');
+        buzz(8);
+        setTimeout(() => removeFromCart(item.id, item.size), reduced ? 0 : 520);
+      });
     });
 
     foot.hidden = false;
     foot.innerHTML = `
       <div class="cart-total">
-        <span class="mono">Итого</span>
+        <span class="mono">Итого · предметов ${items.reduce((n, item) => n + item.qty, 0)}</span>
         <strong>${formatPrice(total)}</strong>
       </div>
-      <a class="btn btn--block" href="/checkout/">Оформить заказ</a>
+      <a class="btn btn--block" href="/checkout/" data-seal>Оформить протокол</a>
       <div class="cart-foot-row">
         <span class="mono">Доставка — на следующем шаге</span>
         <button class="cart-clear mono" data-clear>Очистить</button>
       </div>
     `;
     foot.querySelector('[data-clear]').addEventListener('click', clearCart);
+    // The zipper pulls the bag shut, then the protocol opens.
+    foot.querySelector('[data-seal]').addEventListener('click', (e) => {
+      if (reduced || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault(); // the router skips prevented clicks
+      drawerEl.classList.add('is-sealed');
+      buzz(16);
+      setTimeout(() => navigate('/checkout/'), 540);
+    });
   };
 
   render(getCart());
@@ -124,7 +145,7 @@ export function openCart() {
 
 export function closeCart({ restoreFocus = true } = {}) {
   if (!drawerEl?.classList.contains('is-open')) return;
-  drawerEl.classList.remove('is-open');
+  drawerEl.classList.remove('is-open', 'is-sealed');
   drawerEl.inert = true;
   document.documentElement.classList.remove('no-scroll');
   if (restoreFocus) lastFocus?.focus?.({ preventScroll: true });

@@ -1,5 +1,6 @@
 import { formatPrice, esc } from '../utils/format.js';
 import { picture } from '../utils/media.js';
+import { isDropPending } from '../data/products.js';
 
 /** Typographic tile for a product with no photography uploaded yet. */
 export function noPhoto(product) {
@@ -14,7 +15,8 @@ export function priceHtml(product) {
 
 export function renderProductCard(product, { sizes = '(max-width: 720px) 100vw, 50vw', feature = false } = {}) {
   const [front, back] = product.images;
-  const soldOut = product.units <= 0;
+  const pending = isDropPending(product);
+  const soldOut = !pending && product.units <= 0;
 
   return `
     <article class="product-card ${feature ? 'product-card--feature' : ''}" data-reveal>
@@ -23,6 +25,7 @@ export function renderProductCard(product, { sizes = '(max-width: 720px) 100vw, 
         ${back ? picture(back, { alt: '', sizes, cls: 'product-card-img is-back' }) : ''}
         <span class="product-card-tags mono">
           ${product.new ? '<span class="tag">New</span>' : ''}
+          ${pending ? '<span class="tag tag--drop">Дроп скоро</span>' : ''}
           ${soldOut ? '<span class="tag tag--out">Sold out</span>' : ''}
         </span>
       </a>

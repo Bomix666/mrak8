@@ -180,6 +180,102 @@
   color: #fff;
 }
 
+/* stamps on the buy form and the drop box */
+.product-form,
+.drop-box {
+  position: relative;
+}
+
+.product-form .stamp,
+.drop-box .stamp {
+  left: 50%;
+  top: 50%;
+  --stamp-w: min(86%, 320px);
+  width: var(--stamp-w);
+  /* centred without transform — slam() owns transform. 0.1625 = half the 320×104 ratio */
+  margin: calc(var(--stamp-w) * -0.1625) 0 0 calc(var(--stamp-w) / -2);
+}
+
+.tag--drop {
+  background: var(--ink);
+  color: var(--bone);
+}
+
+/* drop countdown — mono digits, the second ticks */
+.drop-box {
+  display: grid;
+  gap: var(--s-4);
+  margin: var(--s-5) 0 var(--s-4);
+  padding: var(--s-4) 0;
+  border-block: 1px solid var(--line-strong);
+}
+
+.drop-count-label {
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--track-mono);
+}
+
+.drop-count {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 9vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.drop-count i {
+  font-style: normal;
+  color: var(--muted);
+}
+
+.drop-seg {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+}
+
+.drop-seg b {
+  font-weight: inherit;
+}
+
+.drop-seg small {
+  color: var(--muted);
+  font-size: var(--t-mono);
+  font-weight: 500;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.drop-count [data-unit='s'] {
+  animation: drop-tick 1s steps(1) infinite;
+}
+
+@keyframes drop-tick {
+  0% { opacity: 1; }
+  92% { opacity: 0.55; }
+}
+
+.drop-box.is-open .drop-count-label {
+  color: var(--fg);
+  animation: drop-open var(--d-slow) var(--ease-out);
+}
+
+@keyframes drop-open {
+  from { opacity: 0; transform: scale(1.45) rotate(-4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-count [data-unit='s'],
+  .drop-box.is-open .drop-count-label {
+    animation: none;
+  }
+}
+
 .product-card-row {
   display: flex;
   justify-content: space-between;
@@ -335,6 +431,11 @@
 .size-option {
   position: relative;
   cursor: pointer;
+}
+
+/* one size: a single wide cell, nothing to choose */
+.size-option:only-child {
+  grid-column: 1 / -1;
 }
 
 .size-option input {
@@ -588,9 +689,28 @@
   width: auto;
 }
 
+.order-head {
+  position: relative;
+  min-height: 120px;
+}
+
+.order-head .stamp--order {
+  right: 0;
+  top: 0;
+  width: min(54%, 280px);
+}
+
+.order-timeline li[aria-current='step'] {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
 .order-timeline {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line-strong);
 }
 
@@ -780,5 +900,377 @@
 
   .order-items li > :first-child {
     grid-column: 1 / -1;
+  }
+}
+
+/* ---------- protocol (checkout) ---------- */
+.protocol-no {
+  margin: 0 0 var(--s-3);
+  color: var(--muted);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.field-error:not(:empty) {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--track-mono);
+}
+
+/* signature line and «М.П.»: the subject signs, the stamp lands later */
+.sign {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-6) 0 var(--s-5);
+}
+
+.sign-box {
+  height: 62px;
+  border-bottom: 1px solid var(--fg);
+}
+
+.sign-box svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sign-box path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sign-label {
+  grid-column: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  color: var(--muted);
+  font-size: var(--t-mono);
+  text-transform: uppercase;
+}
+
+.sign-mp {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+/* ---------- booked: the protocol is filed ---------- */
+.booked {
+  justify-items: stretch;
+  max-width: 560px;
+}
+
+.booked-form {
+  position: relative;
+  padding-bottom: var(--s-4);
+}
+
+.booked-mp {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 110px;
+  margin: var(--s-5) 0 0 auto;
+  color: var(--muted);
+}
+
+.booked-seal {
+  position: absolute;
+  inset: 0;
+  color: var(--mrak-red);
+  opacity: 0.8;
+  transform: rotate(-14deg);
+  mix-blend-mode: multiply;
+}
+
+.booked-form .stamp--mp {
+  right: 4%;
+  bottom: 18%;
+  width: min(70%, 300px);
+}
+
+.receipt {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-5) var(--s-4);
+  border-block: 2px dashed var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  text-transform: uppercase;
+}
+
+.receipt p {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin: 0;
+}
+
+.receipt b {
+  font-weight: 600;
+  text-align: right;
+}
+
+.receipt-head {
+  justify-content: center !important;
+  margin-bottom: var(--s-2) !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.receipt-total {
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--line);
+  font-size: var(--t-body);
+}
+
+/* ---------- fit ruler: a tape measure for one-size beanies ---------- */
+.fit {
+  display: grid;
+  gap: var(--s-3);
+  margin: var(--s-5) 0;
+  padding: var(--s-4) 0;
+  border-block: 1px solid var(--line);
+}
+
+.fit-kicker {
+  margin: 0;
+  color: var(--muted);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.fit-tape {
+  position: relative;
+  height: 76px;
+  margin: 0 var(--s-3);
+  background: var(--mrak-cream);
+  border-block: 1px solid var(--ink);
+}
+
+/* centimetre ticks every 1/24 of the tape, taller every 4 cm */
+.fit-ticks {
+  position: absolute;
+  inset: 0 22px; /* aligned with the thumb centre's travel */
+  background:
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px calc(100% / 6)) top / 100% 18px no-repeat,
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px calc(100% / 24)) top / 100% 9px no-repeat;
+}
+
+.fit-ticks span {
+  position: absolute;
+  top: 20px;
+  translate: -50% 0;
+  font: 600 var(--t-mono) / 1 var(--font-mono);
+}
+
+.fit-hat {
+  position: absolute;
+  bottom: 6px;
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: var(--accent-text);
+  font: 700 10px / 1 var(--font-mono);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.fit-hat i {
+  width: 2px;
+  height: 18px;
+  background: var(--mrak-red);
+}
+
+.fit-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.fit-range:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 4px;
+}
+
+.fit-range::-webkit-slider-runnable-track {
+  height: 100%;
+  background: transparent;
+}
+
+.fit-range::-moz-range-track {
+  height: 100%;
+  background: transparent;
+}
+
+/* the marker: a black needle with a tab, snapping cm by cm */
+.fit-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px;
+  height: 100%;
+  background: linear-gradient(var(--ink), var(--ink)) center / 2px 100% no-repeat;
+  border: 0;
+}
+
+.fit-range::-moz-range-thumb {
+  width: 44px;
+  height: 100%;
+  background: linear-gradient(var(--ink), var(--ink)) center / 2px 100% no-repeat;
+  border: 0;
+  border-radius: 0;
+}
+
+.fit-read {
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fit-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--t-small);
+}
+
+/* ---- Evidence card: ФАС / СПИНА flip, scanner, loupe (mini app fx) ---- */
+.evidence {
+  position: relative;
+  perspective: 1600px;
+  background: var(--mrak-black, #0b0b0b);
+  cursor: pointer;
+}
+
+.evidence-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--ease-snap);
+}
+
+.evidence.is-back .evidence-card {
+  transform: rotateY(180deg);
+}
+
+.evidence-side {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.evidence-side--back {
+  transform: rotateY(180deg);
+}
+
+.evidence-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evidence-scan {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--signal);
+  box-shadow: 0 0 12px 1px color-mix(in srgb, var(--signal) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.evidence.is-scanning .evidence-scan {
+  animation: evidence-scan 1100ms linear 1;
+}
+
+@keyframes evidence-scan {
+  0% { transform: translateY(0); opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translateY(100cqh); opacity: 0; }
+}
+
+.evidence {
+  container-type: size;
+}
+
+.evidence-lens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 168px;
+  height: 168px;
+  border: 1px solid var(--bone);
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 0 1px var(--ink), 0 12px 32px rgb(0 0 0 / .45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.evidence.is-loupe .evidence-lens {
+  opacity: 1;
+}
+
+.evidence.is-loupe {
+  cursor: zoom-in;
+}
+
+.evidence-switch {
+  position: absolute;
+  left: var(--s-3);
+  /* the lead runs up under the header on desktop and is taller than the screen */
+  top: calc(var(--header-h) + var(--s-3));
+  display: flex;
+  border: 1px solid var(--bone);
+  background: rgb(11 11 11 / .7);
+}
+
+.evidence-switch button {
+  min-height: var(--tap, 44px);
+  padding: 0 14px;
+  color: var(--bone);
+  font: inherit;
+  letter-spacing: var(--track-mono, .08em);
+  text-transform: uppercase;
+}
+
+.evidence-switch button[aria-pressed="true"] {
+  background: var(--bone);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evidence-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .evidence-switch {
+    top: auto;
+    bottom: var(--s-3);
+    left: var(--edge);
   }
 }

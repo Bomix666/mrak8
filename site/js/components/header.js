@@ -1,5 +1,6 @@
 import { getCart, subscribe } from '../state/cart.js';
 import { openCart } from './cartDrawer.js';
+import { STATIC_URL } from '../config.js';
 
 const PRIMARY = [
   ['/shop/', 'Shop'],
@@ -16,7 +17,9 @@ const SECONDARY = [
 export function mountHeader(root) {
   root.innerHTML = `
     <header class="site-header">
-      <a class="logo" href="/" aria-label="MRAK8 — на главную">Mrak8</a>
+      <a class="logo" href="/" aria-label="MRAK8 — на главную"
+        ><img src="${STATIC_URL}assets/mrak8-logo-black-240.webp" width="240" height="121" alt=""
+      /></a>
 
       <nav class="nav-main" aria-label="Основная навигация">
         ${PRIMARY.map(([href, label]) => `<a href="${href}" data-nav>${label}</a>`).join('')}

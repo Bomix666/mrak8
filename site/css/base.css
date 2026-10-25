@@ -12,20 +12,42 @@
 }
 
 :root {
-  /* colour */
-  --ink: #0b0b0b;
-  --coal: #151515;
-  --graphite: #232323;
-  --steel: #8d8f91;
-  --bone: #ece6d8;
-  --paper: #f3f2ef;
-  --signal: #d9261c;
-  --signal-deep: #b01b13;
+  /* colour — one palette with the Telegram mini app (mrakapp tokens.css).
+     Five colours; everything else is the same colours at an alpha. */
+  --mrak-black: #0b0b0b; /* background, ink */
+  --mrak-cream: #f1ece1; /* fabric, paper, primary text */
+  --mrak-red: #e0241b; /* CTA, stamps, REC. On black: large text and graphics only (4.2:1) */
+  --mrak-grey: #8a8680; /* service text, rulers, grids (5.4:1 on black) */
+  --mrak-white: #ffffff; /* only text on red */
 
-  /* type */
-  --font-display: 'Sofia Sans Extra Condensed', 'Arial Narrow', 'Roboto Condensed', Impact, sans-serif;
-  --font-body: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  --cream-70: rgb(241 236 225 / 0.7);
+  --cream-40: rgb(241 236 225 / 0.4);
+  --cream-16: rgb(241 236 225 / 0.16);
+  --cream-08: rgb(241 236 225 / 0.08);
+  --cream-04: rgb(241 236 225 / 0.04);
+  --grey-55: rgb(138 134 128 / 0.55);
+  --grey-28: rgb(138 134 128 / 0.28);
+  --red-24: rgb(224 36 27 / 0.24);
+  --ink-60: rgb(11 11 11 / 0.6);
+  --ink-12: rgb(11 11 11 / 0.12);
+
+  /* site names, kept so components don't change */
+  --ink: var(--mrak-black);
+  --bone: var(--mrak-cream);
+  --paper: var(--mrak-cream);
+  --signal: var(--mrak-red);
+  --signal-deep: #b01b13; /* only small red text on cream (AA); nowhere else */
+  --steel: var(--mrak-grey);
+  --coal: var(--cream-04); /* over black */
+  --graphite: var(--cream-08); /* over black */
+
+  /* type — all three families carry Cyrillic, self-hosted in fonts.css */
+  --font-display: 'Roboto Condensed Variable', 'Roboto Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --font-body: 'Inter Tight Variable', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --lh-display: 0.86;
+  --track-display: -0.015em;
+  --track-mono: 0.06em;
 
   --t-mega: clamp(6rem, 27vw, 30rem);
   --t-h1: clamp(3.6rem, 13vw, 13rem);
@@ -51,10 +73,15 @@
   --header-h: 60px;
   --col: min(1160px, 100% - var(--edge) * 2);
   --measure: 62ch;
+  --tap: 44px;
+  --radius: 0; /* sharp everywhere; stamps get 3–5px, the evidence bag 10px */
 
   /* motion */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* reveals */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* flips, sheets */
+  --ease-slam: cubic-bezier(0.7, 0, 0.84, 0); /* stamp accelerates into the paper */
+  --ease-snap: cubic-bezier(0.3, 1.5, 0.5, 1); /* markers, chips */
+  --d-tick: 80ms;
   --d-fast: 160ms;
   --d-base: 320ms;
   --d-slow: 700ms;
@@ -66,11 +93,11 @@
 :root {
   --bg: var(--ink);
   --fg: var(--bone);
-  --muted: #9c9a93;
-  --line: rgba(236, 230, 216, 0.16);
-  --line-strong: rgba(236, 230, 216, 0.4);
+  --muted: var(--mrak-grey);
+  --line: var(--grey-28);
+  --line-strong: var(--grey-55);
   --accent: var(--signal);
-  --accent-text: #ff4a3d; /* small red text needs more light on black */
+  --accent-text: var(--mrak-cream); /* red is too dark for small text on black */
   --tile: #000;
 }
 
@@ -78,9 +105,9 @@
 [data-theme='bone'] {
   --bg: var(--paper);
   --fg: var(--ink);
-  --muted: #6b6a66;
-  --line: rgba(11, 11, 11, 0.14);
-  --line-strong: rgba(11, 11, 11, 0.5);
+  --muted: var(--ink-60); /* grey on cream is only 3:1 */
+  --line: var(--ink-12);
+  --line-strong: var(--ink-60);
   --accent: var(--signal);
   --accent-text: var(--signal-deep);
   --tile: #000;
@@ -172,8 +199,8 @@ h3 {
   font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
-  line-height: 0.84;
-  letter-spacing: -0.012em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--track-display);
   text-wrap: balance;
 }
 
@@ -416,7 +443,7 @@ main:focus {
   justify-content: space-between;
   padding: var(--s-4);
   background: var(--coal);
-  color: #77756f;
+  color: var(--mrak-grey);
   font-family: var(--font-mono);
   font-size: var(--t-mono);
   letter-spacing: 0.06em;
@@ -427,7 +454,7 @@ main:focus {
   font-family: var(--font-display);
   font-size: clamp(2rem, 6vw, 4rem);
   line-height: 0.85;
-  color: #3a3936;
+  color: var(--cream-16);
 }
 
 /* ---------- scroll reveal ----------

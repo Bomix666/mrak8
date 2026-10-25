@@ -1,3 +1,5 @@
+import { STATIC_URL } from '../config.js';
+
 export function mountFooter(root) {
   const year = new Date().getFullYear();
   root.innerHTML = `
@@ -20,7 +22,8 @@ export function mountFooter(root) {
         </nav>
       </div>
 
-      <div class="footer-word" aria-hidden="true">Mrak8</div>
+      <img class="footer-word" src="${STATIC_URL}assets/mrak8-logo-white-1600.webp" width="1600" height="804"
+        alt="" loading="lazy" decoding="async" />
 
       <div class="footer-base mono">
         <span>© ${year} MRAK8. All subjects are monitored.</span>

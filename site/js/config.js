@@ -15,5 +15,8 @@ export const STATIC_MODE = dataset.mode === 'static';
 export const STATIC_URL = dataset.static || '/site/';
 export const CURRENCY = dataset.currency || 'USD';
 
+/** Telegram mini app. It already notifies drop watchers; the site only links in. */
+export const BOT_URL = 'https://t.me/mrak8_shop_bot';
+
 /** URL of a fixed brand asset built by tools/build_media.py. */
 export const asset = (file) => `${STATIC_URL}assets/media/${file}`;

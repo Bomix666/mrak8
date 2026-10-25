@@ -2,6 +2,7 @@ import { getProducts } from '../data/products.js';
 import { getEntries } from '../data/journal.js';
 import { asset } from '../config.js';
 import { mountRail } from '../components/rail.js';
+import { renderTape } from '../components/tape.js';
 import { entryMeta } from '../components/journalCard.js';
 import { picture, loopVideo, mountVideos } from '../utils/media.js';
 import { mountReveal, mountProgress } from '../utils/scroll.js';
@@ -96,7 +97,11 @@ export async function render(view, { onLeave }) {
   const hero = products?.find((p) => p.cutoutFront) || products?.[0] || null;
   const filmEntry = entries.find((e) => e.featured && e.coverVideo) || entries.find((e) => e.coverVideo);
 
-  view.innerHTML = [showroom(products), hero ? statement(hero) : '', filmEntry ? film(filmEntry) : ''].join('');
+  view.innerHTML = [
+    showroom(products),
+    hero ? renderTape({ rot: -1.2 }) + statement(hero) : '',
+    filmEntry ? renderTape({ variant: 'cream', speed: 28 }) + film(filmEntry) : '',
+  ].join('');
 
   const railRoot = view.querySelector('[data-rail-root]');
   if (!mountRail(railRoot, products || [])) {
