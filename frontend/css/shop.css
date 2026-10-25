@@ -689,9 +689,28 @@
   width: auto;
 }
 
+.order-head {
+  position: relative;
+  min-height: 120px;
+}
+
+.order-head .stamp--order {
+  right: 0;
+  top: 0;
+  width: min(54%, 280px);
+}
+
+.order-timeline li[aria-current='step'] {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
 .order-timeline {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line-strong);
 }
 

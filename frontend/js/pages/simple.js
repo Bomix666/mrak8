@@ -5,17 +5,17 @@ import { navigate } from '../router.js';
 // changes.
 const CONTENT = {
   account: {
-    label: 'Статус заказа',
+    label: 'Досье',
     title: 'Мой заказ',
     description: 'Статус заказа MRAK8 по номеру и e-mail.',
-    body: `<p>Аккаунт для покупки не нужен. Чтобы посмотреть заказ, введите его номер и e-mail, указанный при оформлении.</p>
+    body: `<p>Аккаунт для покупки не нужен. Чтобы открыть досье, введите номер формы из квитанции и e-mail, указанный в протоколе.</p>
            <form data-order-lookup class="lookup-form" novalidate>
-             <label class="field"><span>Номер заказа</span>
+             <label class="field"><span>Номер формы</span>
                <input type="text" name="orderNumber" placeholder="MRAK8-XXXXXX" autocomplete="off" autocapitalize="characters" required /></label>
              <label class="field"><span>E-mail</span>
                <input type="email" name="email" autocomplete="email" inputmode="email" required /></label>
              <p class="form-error" data-lookup-error role="alert"></p>
-             <button type="submit" class="btn">Показать заказ</button>
+             <button type="submit" class="btn">Открыть досье</button>
            </form>`,
   },
   shipping: {
