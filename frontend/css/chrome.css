@@ -30,13 +30,13 @@
   height: 30px;
   padding: 0 9px;
   background: var(--bone);
-  color: var(--signal);
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 1.125rem;
-  letter-spacing: -0.03em;
-  line-height: 1;
   position: relative;
+}
+
+/* The logo is the brand's own file, only scaled — never redrawn or recoloured. */
+.logo img {
+  height: 22px;
+  width: auto;
 }
 
 .nav-main {
@@ -439,13 +439,8 @@
 }
 
 .footer-word {
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 31vw;
-  line-height: 0.74;
-  letter-spacing: -0.06em;
-  margin: 0 -0.03em;
-  color: var(--bone);
+  width: 100%;
+  height: auto;
   user-select: none;
 }
 
