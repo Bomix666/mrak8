@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 from .media import build_variants
@@ -11,7 +12,9 @@ SIZE_CHOICES = [
     ('M', 'M'),
     ('L', 'L'),
     ('XL', 'XL'),
+    ('OS', 'One size'),
 ]
+APPAREL_SIZES = [size for size, _ in SIZE_CHOICES if size != 'OS']
 
 IMAGE_ANGLE_CHOICES = [
     ('main', 'Main'),
@@ -23,15 +26,23 @@ IMAGE_ANGLE_CHOICES = [
 
 PRODUCT_STATUS_CHOICES = [
     ('draft', 'Draft'),
+    ('drop', 'Drop soon'),
     ('active', 'Active'),
     ('archived', 'Archived'),
 ]
+# Shown on the site. A 'drop' product is visible with a countdown and
+# becomes buyable on its own once drop_at has passed — no cron needed.
+VISIBLE_STATUSES = ('drop', 'active')
 
 
 class Category(models.Model):
     name = models.CharField(max_length=80, unique=True)
     slug = models.SlugField(max_length=90, unique=True, blank=True)
     order = models.PositiveIntegerField(default=0)
+    one_size = models.BooleanField(
+        default=False,
+        help_text='Products in this category get a single One size stock row instead of XS–XL (e.g. beanies).',
+    )
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -90,6 +101,14 @@ class Product(models.Model):
     )
 
     status = models.CharField(max_length=10, choices=PRODUCT_STATUS_CHOICES, default='draft')
+    drop_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text='Drop soon: sales open at this moment. Empty = «скоро» without a date.',
+    )
+    measurements = models.JSONField(
+        default=dict, blank=True,
+        help_text='Flat measurements in cm, e.g. {"circumference_cm": 46, "height_cm": 21}.',
+    )
     is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     sold_out_override = models.BooleanField(
@@ -145,6 +164,17 @@ class Product(models.Model):
     @property
     def is_sold_out(self):
         return self.sold_out_override or self.total_stock <= 0
+
+    @property
+    def is_drop_pending(self):
+        return self.status == 'drop' and (self.drop_at is None or self.drop_at > timezone.now())
+
+    @property
+    def drop_state(self):
+        """soon / live / soldout — what the storefront shows."""
+        if self.is_drop_pending:
+            return 'soon'
+        return 'soldout' if self.is_sold_out else 'live'
 
     LOW_STOCK_THRESHOLD = 5
 

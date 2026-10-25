@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import serializers
 
 from .media import image_payload
@@ -49,6 +50,9 @@ class ProductListSerializer(serializers.ModelSerializer):
     inventory = InventorySerializer(many=True, read_only=True)
     cutout_front = serializers.SerializerMethodField()
     cutout_back = serializers.SerializerMethodField()
+    drop_state = serializers.CharField(read_only=True)
+    # The countdown runs from the server clock, never the visitor's.
+    server_time = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -56,10 +60,14 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'code', 'color', 'category', 'collection',
             'price', 'original_price', 'currency', 'is_featured', 'is_new', 'is_sold_out',
             'images', 'inventory', 'cutout_front', 'cutout_back',
+            'drop_at', 'drop_state', 'server_time',
         )
 
     def get_currency(self, obj):
         return settings.SHOP_CURRENCY
+
+    def get_server_time(self, obj):
+        return timezone.now().isoformat()
 
     def get_cutout_front(self, obj):
         return image_payload(obj.cutout_front, obj.cutout_front_width, obj.cutout_front_height, self.context.get('request'))
@@ -75,5 +83,5 @@ class ProductDetailSerializer(ProductListSerializer):
 
     class Meta(ProductListSerializer.Meta):
         fields = ProductListSerializer.Meta.fields + (
-            'description', 'fit_description', 'shipping_note', 'details',
+            'description', 'fit_description', 'shipping_note', 'details', 'measurements',
         )

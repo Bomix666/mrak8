@@ -19,7 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
 from django.views.static import serve
 
-from apps.catalog.models import Product
+from apps.catalog.models import VISIBLE_STATUSES, Product
 from apps.journal.models import Entry
 
 SITE_NAME = 'MRAK8'
@@ -93,7 +93,7 @@ def not_found(request, *args, **kwargs):
 
 def product(request, slug):
     item = (
-        Product.objects.filter(slug=slug, status='active')
+        Product.objects.filter(slug=slug, status__in=VISIBLE_STATUSES)
         .prefetch_related('images', 'inventory')
         .first()
     )
@@ -124,9 +124,13 @@ def product(request, slug):
             'url': request.build_absolute_uri(export_base() + item.get_absolute_url()),
             'price': str(item.current_price),
             'priceCurrency': settings.SHOP_CURRENCY,
-            'availability': 'https://schema.org/OutOfStock' if item.is_sold_out else 'https://schema.org/InStock',
+            'availability': (
+                'https://schema.org/InStock' if item.drop_state == 'live' else 'https://schema.org/OutOfStock'
+            ),
         },
     }
+    if item.is_drop_pending and item.drop_at:
+        structured['offers']['availabilityStarts'] = item.drop_at.isoformat()
     noscript = {
         'heading': item.name,
         'lines': [item.color, f'{item.current_price} {settings.SHOP_CURRENCY}', item.description],

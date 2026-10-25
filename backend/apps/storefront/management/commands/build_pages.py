@@ -19,7 +19,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.test import Client, override_settings
 
-from apps.catalog.models import Product
+from apps.catalog.models import VISIBLE_STATUSES, Product
 from apps.journal.models import Entry
 
 PAGES = ['/', '/shop/', '/journal/', '/about/', '/shipping/', '/contact/', '/account/', '/checkout/']
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text(rebase(json.dumps(response.json(), ensure_ascii=False)), encoding='utf-8')
 
-            products = list(Product.objects.filter(status='active').values_list('slug', flat=True))
+            products = list(Product.objects.filter(status__in=VISIBLE_STATUSES).values_list('slug', flat=True))
             entries = list(Entry.objects.filter(status='published').values_list('slug', flat=True))
 
             for path in PAGES:

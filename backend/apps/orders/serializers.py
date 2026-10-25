@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import F
 from rest_framework import serializers
 
-from apps.catalog.models import Inventory, Product
+from apps.catalog.models import SIZE_CHOICES, VISIBLE_STATUSES, Inventory, Product
 
 from .models import Order, OrderItem, ShippingAddress
 from .validators import validate_phone, validate_postal_code
@@ -26,7 +26,7 @@ class CheckoutItemSerializer(serializers.Serializer):
     """
 
     product_id = serializers.IntegerField()
-    size = serializers.ChoiceField(choices=['XS', 'S', 'M', 'L', 'XL'])
+    size = serializers.ChoiceField(choices=[size for size, _ in SIZE_CHOICES])
     quantity = serializers.IntegerField(min_value=1, max_value=10)
 
 
@@ -80,9 +80,13 @@ class OrderCreateSerializer(serializers.Serializer):
         resolved = []
         for item in attrs['items']:
             try:
-                product = Product.objects.get(pk=item['product_id'], status='active')
+                product = Product.objects.get(pk=item['product_id'], status__in=VISIBLE_STATUSES)
             except Product.DoesNotExist:
                 errors.append('Один из товаров больше недоступен. Обновите корзину.')
+                continue
+
+            if product.is_drop_pending:
+                errors.append(f'{product.name}: дроп ещё не начался.')
                 continue
 
             try:

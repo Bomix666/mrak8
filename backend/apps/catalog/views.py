@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Category, Collection, Product, ProductImage
+from .models import VISIBLE_STATUSES, Category, Collection, Product, ProductImage
 from .serializers import (
     CategorySerializer,
     CollectionSerializer,
@@ -26,9 +26,9 @@ class CollectionViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    GET /api/products/                 — active products, filterable
+    GET /api/products/                 — active and drop-soon products, filterable
     GET /api/products/?category=jeans
-    GET /api/products/?collection=first-signal
+    GET /api/products/?collection=winter
     GET /api/products/?featured=true
     GET /api/products/?new=true
     GET /api/products/<slug>/          — full detail payload
@@ -38,7 +38,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = (
-            Product.objects.filter(status='active')
+            Product.objects.filter(status__in=VISIBLE_STATUSES)
             .select_related('category', 'collection')
             .prefetch_related(
                 Prefetch('images', queryset=ProductImage.objects.order_by('order')),

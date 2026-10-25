@@ -154,6 +154,13 @@ python manage.py build_pages --out ../../mrak8-pages --base /mrak8 --origin http
 `cutout_front`, `cutout_back`, у изображений — `width`, `height`, `srcset`.
 Ничего не переименовано и не удалено.
 
+Дроп: у товара статус `Drop soon` и `drop_at`. Такой товар виден на сайте,
+API отдаёт `drop_at`, `drop_state` (`soon` / `live` / `soldout`) и `server_time`
+(отсчёт идёт от часов сервера). До `drop_at` заказ отклоняется, после —
+продаётся сам, без cron и ручного переключения. Категория с `One size`
+(например, шапки) получает одну строку остатка `OS`; замеры — поле
+`measurements` в карточке (`{"circumference_cm": 46, "height_cm": 21}`).
+
 ## 7. Перед продакшеном
 
 - `DJANGO_DEBUG=False`, настоящий `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`.

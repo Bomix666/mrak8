@@ -76,9 +76,9 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Identity', {'fields': ('name', 'slug', 'code', 'sku', 'color')}),
-        ('Merchandising', {'fields': ('category', 'collection', 'status', 'is_featured', 'is_new', 'sold_out_override')}),
+        ('Merchandising', {'fields': ('category', 'collection', 'status', 'drop_at', 'is_featured', 'is_new', 'sold_out_override')}),
         ('Pricing', {'fields': ('price', 'sale_price')}),
-        ('Copy', {'fields': ('description', 'fit_description', 'shipping_note')}),
+        ('Copy', {'fields': ('description', 'fit_description', 'measurements', 'shipping_note')}),
         ('Showroom rail', {
             'fields': ('cutout_front', 'cutout_back'),
             'description': 'Garment cut out on a transparent background. With a front cut-out the product hangs on the homepage rail.',
