@@ -3,6 +3,7 @@ import { mountDropCountdown } from '../components/dropCountdown.js';
 import { BOT_URL } from '../config.js';
 import { renderTape } from '../components/tape.js';
 import { slam, lift } from '../utils/fx.js';
+import { mountFitRuler } from '../components/fitRuler.js';
 import { getEntries } from '../data/journal.js';
 import { mountImageGallery } from '../components/imageGallery.js';
 import { mountSizeSelector } from '../components/sizeSelector.js';
@@ -65,6 +66,8 @@ export async function render(view, ctx) {
             <p class="form-error" data-buy-error role="alert"></p>
           </form>
 
+          ${product.measurements.circumference_cm ? '<div data-fit></div>' : ''}
+
           <div class="accordions">
             ${accordion('Детали', product.details.length ? `<ul>${product.details.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '', true)}
             ${accordion('Посадка', product.fit ? `<p>${esc(product.fit)}</p>` : '')}
@@ -93,6 +96,8 @@ export async function render(view, ctx) {
   onLeave(mountImageGallery(view.querySelector('[data-gallery]'), product));
   onLeave(mountReveal(view));
   onLeave(mountVideos(view));
+  const fitEl = view.querySelector('[data-fit]');
+  if (fitEl) mountFitRuler(fitEl, product.measurements);
 
   const errorEl = view.querySelector('[data-buy-error]');
   const addBtn = view.querySelector('[data-add-cart]');
