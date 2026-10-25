@@ -883,3 +883,137 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ---------- protocol (checkout) ---------- */
+.protocol-no {
+  margin: 0 0 var(--s-3);
+  color: var(--muted);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.field-error:not(:empty) {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--track-mono);
+}
+
+/* signature line and «М.П.»: the subject signs, the stamp lands later */
+.sign {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-6) 0 var(--s-5);
+}
+
+.sign-box {
+  height: 62px;
+  border-bottom: 1px solid var(--fg);
+}
+
+.sign-box svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sign-box path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sign-label {
+  grid-column: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  color: var(--muted);
+  font-size: var(--t-mono);
+  text-transform: uppercase;
+}
+
+.sign-mp {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+/* ---------- booked: the protocol is filed ---------- */
+.booked {
+  justify-items: stretch;
+  max-width: 560px;
+}
+
+.booked-form {
+  position: relative;
+  padding-bottom: var(--s-4);
+}
+
+.booked-mp {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 110px;
+  margin: var(--s-5) 0 0 auto;
+  color: var(--muted);
+}
+
+.booked-seal {
+  position: absolute;
+  inset: 0;
+  color: var(--mrak-red);
+  opacity: 0.8;
+  transform: rotate(-14deg);
+  mix-blend-mode: multiply;
+}
+
+.booked-form .stamp--mp {
+  right: 4%;
+  bottom: 18%;
+  width: min(70%, 300px);
+}
+
+.receipt {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-5) var(--s-4);
+  border-block: 2px dashed var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  text-transform: uppercase;
+}
+
+.receipt p {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin: 0;
+}
+
+.receipt b {
+  font-weight: 600;
+  text-align: right;
+}
+
+.receipt-head {
+  justify-content: center !important;
+  margin-bottom: var(--s-2) !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.receipt-total {
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--line);
+  font-size: var(--t-body);
+}

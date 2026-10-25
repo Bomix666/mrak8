@@ -51,9 +51,67 @@ export function stampSVG(text, sub = '', { w = 320, h = 104, color = 'currentCol
     <g filter="url(#${id})" fill="none" stroke="${color}">
       <rect x="5" y="5" width="${w - 10}" height="${h - 10}" rx="5" stroke-width="5"/>
       ${double ? `<rect x="14" y="14" width="${w - 28}" height="${h - 28}" rx="2" stroke-width="2"/>` : ''}
-      <text x="${w / 2}" y="${sub ? h * 0.6 : h * 0.68}" text-anchor="middle" fill="${color}" stroke="none" font-family="Roboto Condensed Variable, Roboto Condensed, Arial Narrow, sans-serif" font-weight="900" font-size="${sub ? fs * 0.9 : fs}" letter-spacing="2" textLength="${w - 56}" lengthAdjust="spacingAndGlyphs">${esc(text)}</text>
+      <text x="${w / 2}" y="${sub ? h * 0.6 : h * 0.68}" text-anchor="middle" fill="${color}" stroke="none" font-family="Roboto Condensed Variable, Roboto Condensed, Arial Narrow, sans-serif" font-weight="900" font-size="${sub ? fs * 0.9 : fs}" letter-spacing="2" textLength="${w - 56}" lengthAdjust="spacingAndGlyphs">${esc(text.toUpperCase())}</text>
       ${sub ? `<text x="${w / 2}" y="${h * 0.84}" text-anchor="middle" fill="${color}" stroke="none" font-family="JetBrains Mono Variable, JetBrains Mono, monospace" font-weight="700" font-size="${h * 0.11}" letter-spacing="1.5">${esc(sub)}</text>` : ''}
     </g></svg>`;
+}
+
+/** Round office seal for «М.П.»: text along the ring, the two rings of the «8» in the middle. */
+export function sealSVG(ring, sub = '', { size = 120, color = 'currentColor' } = {}) {
+  const id = `ink${seed++}`;
+  const r = size / 2;
+  const tr = r - 13;
+  const inner = r - 24;
+  return `<svg viewBox="0 0 ${size} ${size}" aria-hidden="true"><defs><filter id="${id}" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="${seed}" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.4 0 0 0 1.85" result="m"/>
+    <feComposite in="SourceGraphic" in2="m" operator="in" result="k"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="${seed + 7}" result="w"/>
+    <feDisplacementMap in="k" in2="w" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <path id="${id}r" d="M ${r - tr} ${r} a ${tr} ${tr} 0 1 1 ${tr * 2} 0 a ${tr} ${tr} 0 1 1 ${-tr * 2} 0"/></defs>
+    <g filter="url(#${id})" fill="none" stroke="${color}">
+      <circle cx="${r}" cy="${r}" r="${r - 3}" stroke-width="3"/>
+      <circle cx="${r}" cy="${r}" r="${inner}" stroke-width="1.3"/>
+      <ellipse cx="${r}" cy="${r - size * 0.07}" rx="${size * 0.165}" ry="${size * 0.054}" stroke-width="${size * 0.03}"/>
+      <ellipse cx="${r}" cy="${r + size * 0.05}" rx="${size * 0.2}" ry="${size * 0.066}" stroke-width="${size * 0.03}"/>
+      <text fill="${color}" stroke="none" font-family="JetBrains Mono Variable, JetBrains Mono, monospace" font-weight="700" font-size="${size * 0.078}"><textPath href="#${id}r" textLength="${(2 * Math.PI * tr - 6).toFixed(1)}" lengthAdjust="spacing">${esc(ring)}</textPath></text>
+      ${sub ? `<text x="${r}" y="${r + inner * 0.78}" text-anchor="middle" fill="${color}" stroke="none" font-family="JetBrains Mono Variable, JetBrains Mono, monospace" font-weight="700" font-size="${size * 0.062}">${esc(sub)}</text>` : ''}
+    </g></svg>`;
+}
+
+/** A deterministic scribble from the subject's name — their «signature». */
+export function signPath(seedStr, w = 240, h = 62) {
+  let s = 0;
+  for (const c of String(seedStr)) s = (s * 31 + c.charCodeAt(0)) >>> 0;
+  const rnd = () => (s = (s * 1103515245 + 12345) >>> 0) / 4294967296;
+  let x = 10;
+  const y = h * 0.62;
+  let d = `M ${x} ${y}`;
+  const loops = 5 + (s % 3);
+  for (let i = 0; i < loops; i++) {
+    const up = h * (0.12 + rnd() * 0.3);
+    const dx = (w - 60) / loops;
+    d += ` C ${x + dx * 0.2} ${y - up * 1.6} ${x + dx * 0.9} ${y - up * 1.2} ${x + dx * 0.55} ${y + 4}`;
+    x += dx;
+    d += ` S ${x + dx * 0.1} ${y - up * 0.2} ${x} ${y}`;
+  }
+  return `${d} C ${x + 14} ${y + 10} ${x - 70} ${y + 14} ${x - 120} ${y + 6}`;
+}
+
+/** Draws an SVG path as if by hand. */
+export function drawPath(path, duration = 900) {
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = String(len);
+  return done(anim(path, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }), duration + 100);
+}
+
+/** Lines appear one by one, like a thermal printer. */
+export function printLines(lines, step = 45) {
+  lines.forEach((line, i) =>
+    anim(line, [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], {
+      duration: 180, delay: i * step, fill: 'backwards', easing: 'steps(3)',
+    })
+  );
 }
 
 /**

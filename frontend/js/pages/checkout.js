@@ -5,8 +5,10 @@ import { ApiError } from '../services/apiClient.js';
 import { navigate } from '../router.js';
 import { formatPrice, esc } from '../utils/format.js';
 import { STATIC_MODE } from '../config.js';
+import { buzz, drawPath, printLines, sealSVG, shake, signPath, slam } from '../utils/fx.js';
 
-const META = { title: 'Оформление заказа — MRAK8', description: '' };
+const META = { title: 'Протокол — MRAK8', description: '' };
+const toCents = (decimal) => Math.round(parseFloat(decimal) * 100);
 
 // name -> [label, input attributes]. `shipping.*` fields are nested in the
 // payload the same way the API expects them. Patterns mirror the server's
@@ -36,7 +38,7 @@ function field(name) {
 
 function localMessage(input) {
   const { validity } = input;
-  if (validity.valueMissing) return 'Заполните это поле.';
+  if (validity.valueMissing) return 'Обязательно.';
   if (validity.typeMismatch) return 'Проверьте адрес e-mail.';
   if (validity.patternMismatch) return input.name === 'phone' ? 'Введите номер в формате +7 900 000-00-00.' : 'Проверьте значение.';
   return '';
@@ -44,8 +46,8 @@ function localMessage(input) {
 
 function summary(cart) {
   return `
-    <aside class="checkout-summary" aria-label="Ваш заказ">
-      <h2 class="t-h3">Ваш заказ</h2>
+    <aside class="checkout-summary" aria-label="Опись изъятого">
+      <h2 class="t-h3">Опись изъятого</h2>
       ${cart.notice ? `<p class="cart-notice" role="status">${esc(cart.notice)}</p>` : ''}
       <ul class="checkout-items">
         ${cart.items.map((item) => `
@@ -86,7 +88,8 @@ export async function render(view) {
     view.innerHTML = `
       <section class="state" data-theme="paper">
         <p class="mono">Оформление заказа</p>
-        <h1>Корзина пуста</h1>
+        <h1>Изъятых вещей нет</h1>
+        <p>Протокол составлять не на что. Подозрительно.</p>
         ${cart.notice ? `<p>${esc(cart.notice)}</p>` : ''}
         <a class="link" href="/shop/">В магазин</a>
       </section>`;
@@ -97,11 +100,12 @@ export async function render(view) {
     <div data-theme="paper">
       <section class="checkout page-top">
         <div class="checkout-main">
-          <h1 class="t-h2">Оформление</h1>
+          <p class="mono protocol-no">Форма № — присваивается при оформлении</p>
+          <h1 class="t-h2">Протокол</h1>
 
           <form data-checkout-form novalidate>
             <fieldset>
-              <legend class="mono">01 / Контакты</legend>
+              <legend class="mono">01 / Субъект</legend>
               ${field('email')}
               ${field('phone')}
             </fieldset>
@@ -114,8 +118,16 @@ export async function render(view) {
               <div class="field-row">${field('postal_code')}${field('country')}</div>
             </fieldset>
 
+            <div class="sign" aria-hidden="true">
+              <div class="sign-box">
+                <svg viewBox="0 0 240 62" preserveAspectRatio="none"><path data-sign d="" /></svg>
+              </div>
+              <div class="sign-label mono"><span>Подпись субъекта</span><span data-sign-name>—</span></div>
+              <span class="sign-mp mono">М.П.</span>
+            </div>
+
             <p class="form-error" data-form-error role="alert"></p>
-            <button type="submit" class="btn btn--block" data-submit>Оформить заказ</button>
+            <button type="submit" class="btn btn--block" data-submit>Подписать и оформить</button>
             <p class="mono checkout-note">Оплата — на следующем шаге. До её подтверждения ничего не списывается.</p>
           </form>
         </div>
@@ -137,6 +149,20 @@ export async function render(view) {
     return true;
   }
 
+  // The signature draws itself once the subject has given a full name.
+  const signEl = form.querySelector('[data-sign]');
+  const signName = form.querySelector('[data-sign-name]');
+  let signedAs = '';
+  function sign() {
+    const name = `${form.elements.first_name.value.trim()} ${form.elements.last_name.value.trim()}`.trim();
+    if (!form.elements.first_name.value.trim() || !form.elements.last_name.value.trim() || name === signedAs) return;
+    signedAs = name;
+    signName.textContent = name;
+    signEl.setAttribute('d', signPath(name));
+    drawPath(signEl);
+  }
+  ['first_name', 'last_name'].forEach((name) => form.elements[name].addEventListener('change', sign));
+
   Object.keys(FIELDS).forEach((name) => {
     const input = form.elements[name];
     input.addEventListener('blur', () => setError(name, localMessage(input)));
@@ -155,6 +181,9 @@ export async function render(view) {
       return message;
     });
     if (invalid.length) {
+      formError.textContent = 'Протокол не заполнен.';
+      shake(form, 6);
+      buzz([10, 40, 10]);
       form.elements[invalid[0]].focus();
       return;
     }
@@ -177,6 +206,7 @@ export async function render(view) {
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Оформляем…';
+    sign(); // no signature drawn yet if the name came from autofill
 
     try {
       const result = await createOrder(payload);
@@ -184,7 +214,7 @@ export async function render(view) {
       renderPaymentStep(view, result, payload.email);
     } catch (err) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Оформить заказ';
+      submitBtn.textContent = 'Подписать и оформить';
       showServerErrors(err);
     }
   });
@@ -227,19 +257,40 @@ function renderPaymentStep(view, result, email) {
   // test_confirm_endpoint then, and 404s the endpoint otherwise).
   const canTestConfirm = Boolean(payment.test_confirm_endpoint);
 
+  const date = new Date(order.created_at || Date.now()).toLocaleString('ru-RU');
+  const count = order.items.reduce((n, item) => n + item.quantity, 0);
+
   view.innerHTML = `
-    <section class="state" data-theme="paper">
-      <p class="mono">Заказ ${esc(order.order_number)}</p>
-      <h1>Ожидает оплаты</h1>
-      <p>Заказ создан. Номер и e-mail понадобятся, чтобы проверить его статус.</p>
+    <section class="state booked" data-theme="paper">
+      <div class="booked-form" data-booked>
+        <p class="mono">Форма № ${esc(order.order_number)}</p>
+        <h1>Протокол составлен</h1>
+        <p>Номер и e-mail понадобятся, чтобы открыть досье заказа.</p>
+        <div class="booked-mp mono"><span>М.П.</span><div class="booked-seal">${sealSVG('MRAK8 ✶ CENTRAL BOOKING & INTAKE CENTER ✶ ', 'ДЕЖУРНЫЙ')}</div></div>
+      </div>
+
+      <div class="receipt" aria-label="Квитанция">
+        <p class="receipt-head">Квитанция об изъятии</p>
+        <p><span>Форма №</span><b>${esc(order.order_number)}</b></p>
+        <p><span>Дата</span><b>${esc(date)}</b></p>
+        ${order.items.map((item) => `<p><span>${esc(item.product_name)} · ${item.size === 'OS' ? 'one size' : esc(item.size)} × ${item.quantity}</span><b>${formatPrice(toCents(item.line_total))}</b></p>`).join('')}
+        <p><span>Предметов</span><b>${count}</b></p>
+        <p class="receipt-total"><span>Итого</span><b>${formatPrice(toCents(order.total))}</b></p>
+        <p><span>Статус</span><b>Ожидает оплаты</b></p>
+      </div>
+
       ${canTestConfirm ? `
         <p class="mono">Режим разработки: платёжный провайдер не подключён.</p>
         <button class="btn" data-test-confirm>Подтвердить тестовую оплату</button>
         <p class="form-error" data-payment-error role="alert"></p>` : ''}
-      <a class="link" href="${esc(statusPath)}">Статус заказа</a>
+      <a class="link" href="${esc(statusPath)}">Досье заказа</a>
     </section>
   `;
   window.scrollTo(0, 0);
+
+  // The stamp lands on «М.П.», then the receipt prints line by line.
+  slam(view.querySelector('[data-booked]'), 'Принят', { sub: `ФОРМА № ${order.order_number}`, rot: -11, cls: 'stamp--mp' })
+    .then(() => printLines([...view.querySelectorAll('.receipt > *')]));
 
   view.querySelector('[data-test-confirm]')?.addEventListener('click', async (e) => {
     const btn = e.currentTarget;
