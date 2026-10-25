@@ -77,9 +77,9 @@ function match(path) {
 function renderFailure(view, retry) {
   view.innerHTML = `
     <section class="state" data-theme="dark">
-      <p class="mono">Ошибка связи</p>
-      <h1>Сервер не отвечает</h1>
-      <p>Страница не загрузилась. Проверьте соединение и попробуйте ещё раз.</p>
+      <p class="mono">Cam offline · сигнал потерян</p>
+      <h1>Связь с центром потеряна</h1>
+      <p>Страница не загрузилась. Проверьте соединение — наблюдение возобновится.</p>
       <button class="btn btn--ghost" data-retry>Повторить</button>
     </section>`;
   view.querySelector('[data-retry]').addEventListener('click', retry);
