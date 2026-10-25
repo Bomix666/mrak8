@@ -1,6 +1,8 @@
 import { getProductBySlug, getRelatedProducts, isDropPending } from '../data/products.js';
 import { mountDropCountdown } from '../components/dropCountdown.js';
 import { BOT_URL } from '../config.js';
+import { renderTape } from '../components/tape.js';
+import { slam, lift } from '../utils/fx.js';
 import { getEntries } from '../data/journal.js';
 import { mountImageGallery } from '../components/imageGallery.js';
 import { mountSizeSelector } from '../components/sizeSelector.js';
@@ -72,6 +74,8 @@ export async function render(view, ctx) {
         </div>
       </section>
 
+      ${stories.length || related.length ? renderTape({ variant: 'dark' }) : ''}
+
       ${stories.length ? `
       <section class="product-stories" aria-labelledby="stories-title">
         <header class="section-head"><h2 id="stories-title">В журнале</h2><a class="link" href="/journal/">Journal</a></header>
@@ -115,6 +119,7 @@ export async function render(view, ctx) {
       product = fresh;
       soldOut = product.units <= 0;
       dropBox.classList.add('is-open');
+      if (!soldOut) slam(dropBox, 'Дроп зима', { sub: 'В ПРОДАЖЕ', rot: -6, cls: 'stamp--drop' }).then((s) => lift(s, 1600));
       dropBox.querySelector('[data-countdown]').innerHTML = `<p class="drop-count-label mono">${soldOut ? 'Изъято' : 'В продаже'}</p>`;
       dropBox.querySelector('a')?.remove();
       sizeSelector = mountSizes();
@@ -150,13 +155,18 @@ export async function render(view, ctx) {
       errorEl.textContent = `В наличии только ${sizeSelector.quantity()} шт. этого размера — они уже в корзине.`;
       return;
     }
-    addBtn.textContent = 'Добавлено';
+    addBtn.textContent = 'Изъято';
     addBtn.classList.add('is-done');
     setTimeout(() => {
       addBtn.textContent = 'В корзину';
       addBtn.classList.remove('is-done');
     }, 1400);
-    openCart();
+    // The stamp lands where the tap was, then the bag opens.
+    const form = e.currentTarget;
+    slam(form, 'Изъято', { sub: `${product.code} · ВЕЩДОК` }).then((stamp) => {
+      lift(stamp, 500);
+      openCart();
+    });
   });
 
   return { title: `${product.name} — MRAK8`, description: product.description };

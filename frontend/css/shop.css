@@ -180,6 +180,22 @@
   color: #fff;
 }
 
+/* stamps on the buy form and the drop box */
+.product-form,
+.drop-box {
+  position: relative;
+}
+
+.product-form .stamp,
+.drop-box .stamp {
+  left: 50%;
+  top: 50%;
+  --stamp-w: min(86%, 320px);
+  width: var(--stamp-w);
+  /* centred without transform — slam() owns transform. 0.1625 = half the 320×104 ratio */
+  margin: calc(var(--stamp-w) * -0.1625) 0 0 calc(var(--stamp-w) / -2);
+}
+
 .tag--drop {
   background: var(--ink);
   color: var(--bone);

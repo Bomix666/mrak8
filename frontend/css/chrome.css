@@ -33,6 +33,83 @@
   position: relative;
 }
 
+/* ---------- crime-scene tape (same as the mini app) ---------- */
+.tape {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  overflow: hidden;
+  background: var(--mrak-red);
+  color: var(--mrak-cream);
+  transform: rotate(var(--tape-rot, 0deg));
+}
+
+.tape--cream {
+  background: var(--mrak-cream);
+  color: var(--mrak-black);
+}
+
+.tape--dark {
+  background: transparent;
+  color: var(--mrak-grey);
+  border-block: 1px solid var(--line);
+}
+
+.tape__track {
+  display: flex;
+  flex: none;
+  white-space: nowrap;
+  animation: tape var(--tape-speed, 22s) linear infinite;
+  will-change: transform;
+}
+
+.tape__track span {
+  padding-right: 22px;
+  font: 800 13px/1 var(--font-display);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.tape__track span::after {
+  content: '■';
+  margin-left: 22px;
+  font-size: 7px;
+  vertical-align: 2px;
+}
+
+@keyframes tape {
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- rubber stamp (utils/fx.js) ---------- */
+.stamp {
+  position: absolute;
+  z-index: 3;
+  color: var(--mrak-red);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.stamp svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+[data-theme='paper'] .stamp svg,
+[data-theme='bone'] .stamp svg {
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tape__track {
+    animation: none;
+  }
+}
+
 /* The logo is the brand's own file, only scaled — never redrawn or recoloured. */
 .logo img {
   height: 22px;
