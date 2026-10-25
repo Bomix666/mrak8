@@ -180,6 +180,86 @@
   color: #fff;
 }
 
+.tag--drop {
+  background: var(--ink);
+  color: var(--bone);
+}
+
+/* drop countdown — mono digits, the second ticks */
+.drop-box {
+  display: grid;
+  gap: var(--s-4);
+  margin: var(--s-5) 0 var(--s-4);
+  padding: var(--s-4) 0;
+  border-block: 1px solid var(--line-strong);
+}
+
+.drop-count-label {
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--track-mono);
+}
+
+.drop-count {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 9vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.drop-count i {
+  font-style: normal;
+  color: var(--muted);
+}
+
+.drop-seg {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+}
+
+.drop-seg b {
+  font-weight: inherit;
+}
+
+.drop-seg small {
+  color: var(--muted);
+  font-size: var(--t-mono);
+  font-weight: 500;
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+.drop-count [data-unit='s'] {
+  animation: drop-tick 1s steps(1) infinite;
+}
+
+@keyframes drop-tick {
+  0% { opacity: 1; }
+  92% { opacity: 0.55; }
+}
+
+.drop-box.is-open .drop-count-label {
+  color: var(--fg);
+  animation: drop-open var(--d-slow) var(--ease-out);
+}
+
+@keyframes drop-open {
+  from { opacity: 0; transform: scale(1.45) rotate(-4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-count [data-unit='s'],
+  .drop-box.is-open .drop-count-label {
+    animation: none;
+  }
+}
+
 .product-card-row {
   display: flex;
   justify-content: space-between;
@@ -335,6 +415,11 @@
 .size-option {
   position: relative;
   cursor: pointer;
+}
+
+/* one size: a single wide cell, nothing to choose */
+.size-option:only-child {
+  grid-column: 1 / -1;
 }
 
 .size-option input {

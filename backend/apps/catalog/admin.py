@@ -76,7 +76,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Identity', {'fields': ('name', 'slug', 'code', 'sku', 'color')}),
-        ('Merchandising', {'fields': ('category', 'collection', 'status', 'drop_at', 'is_featured', 'is_new', 'sold_out_override')}),
+        ('Merchandising', {'fields': ('category', 'collection', 'status', 'drop_at', 'bot_product_id', 'is_featured', 'is_new', 'sold_out_override')}),
         ('Pricing', {'fields': ('price', 'sale_price')}),
         ('Copy', {'fields': ('description', 'fit_description', 'measurements', 'shipping_note')}),
         ('Showroom rail', {

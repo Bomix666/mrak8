@@ -5,10 +5,29 @@
 // to change with it.
 
 import { apiFetch } from '../services/apiClient.js';
+import { STATIC_MODE } from '../config.js';
 
 export { formatPrice } from '../utils/format.js';
 
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL'];
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
+
+/** Server clock minus device clock. The static export has no live server,
+ *  so there the device clock is all we have. */
+function clockOffset(serverTime) {
+  if (STATIC_MODE || !serverTime) return 0;
+  return Date.parse(serverTime) - Date.now();
+}
+
+/** Milliseconds until sales open, by the server's clock (Infinity: no date yet). */
+export function msToDrop(product) {
+  return product.dropAt == null ? Infinity : product.dropAt - (Date.now() + product.clockOffset);
+}
+
+/** Announced but not on sale yet. Re-checked live, so a page left open
+ *  through the drop flips without a reload. */
+export function isDropPending(product) {
+  return product.dropState === 'soon' && msToDrop(product) > 0;
+}
 
 function centsFromDecimalString(value) {
   return Math.round(parseFloat(value) * 100);
@@ -53,6 +72,11 @@ export function normalizeProduct(raw) {
     sizes,
     cutoutFront: raw.cutout_front,
     cutoutBack: raw.cutout_back,
+    dropState: raw.drop_state || 'live', // older payloads have no drops
+    dropAt: raw.drop_at ? Date.parse(raw.drop_at) : null,
+    clockOffset: clockOffset(raw.server_time),
+    botId: raw.bot_product_id || null,
+    measurements: raw.measurements || {},
   };
 }
 

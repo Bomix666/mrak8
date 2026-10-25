@@ -1,6 +1,7 @@
 import { esc } from '../utils/format.js';
 
 const LOW_STOCK = 5;
+const LABEL = { OS: 'One size' };
 
 /**
  * Size picker driven by real per-size inventory.
@@ -18,7 +19,7 @@ export function mountSizeSelector(container, { sizes = [], selected = null, onCh
             const out = quantity <= 0;
             return `<label class="size-option ${out ? 'is-out' : ''}">
               <input type="radio" name="size" value="${esc(size)}" ${out ? 'disabled' : ''} />
-              <span>${esc(size)}</span>
+              <span>${esc(LABEL[size] || size)}</span>
             </label>`;
           })
           .join('')}
@@ -33,7 +34,8 @@ export function mountSizeSelector(container, { sizes = [], selected = null, onCh
 
   function describe(size) {
     const quantity = stock.get(size) || 0;
-    status.textContent = quantity <= LOW_STOCK ? `Размер ${size}: осталось ${quantity}` : `Размер ${size}: в наличии`;
+    const name = LABEL[size] || `Размер ${size}`;
+    status.textContent = quantity <= LOW_STOCK ? `${name}: осталось ${quantity}` : `${name}: в наличии`;
     status.classList.toggle('red', quantity <= LOW_STOCK);
   }
 
@@ -45,6 +47,8 @@ export function mountSizeSelector(container, { sizes = [], selected = null, onCh
     });
   });
 
+  // A single size (one size) has nothing to choose — take it.
+  if (!selected && sizes.length === 1) selected = sizes[0].size;
   if (selected && (stock.get(selected) || 0) > 0) {
     const input = container.querySelector(`input[value="${CSS.escape(selected)}"]`);
     input.checked = true;

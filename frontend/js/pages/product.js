@@ -1,4 +1,6 @@
-import { getProductBySlug, getRelatedProducts } from '../data/products.js';
+import { getProductBySlug, getRelatedProducts, isDropPending } from '../data/products.js';
+import { mountDropCountdown } from '../components/dropCountdown.js';
+import { BOT_URL } from '../config.js';
 import { getEntries } from '../data/journal.js';
 import { mountImageGallery } from '../components/imageGallery.js';
 import { mountSizeSelector } from '../components/sizeSelector.js';
@@ -17,9 +19,14 @@ function accordion(title, body, open = false) {
   return `<details class="accordion" ${open ? 'open' : ''}><summary>${title}</summary><div class="accordion-body">${body}</div></details>`;
 }
 
+function buttonLabel(product) {
+  if (isDropPending(product)) return 'Дроп скоро';
+  return product.units <= 0 ? 'Вещдок изъят другим субъектом' : 'В корзину';
+}
+
 export async function render(view, ctx) {
   const { slug, query, onLeave } = ctx;
-  const product = await getProductBySlug(slug);
+  let product = await getProductBySlug(slug);
   if (!product) return renderNotFound(view, ctx);
 
   // Secondary content must never block or break the page that sells.
@@ -27,7 +34,8 @@ export async function render(view, ctx) {
     getRelatedProducts(slug).catch(() => []),
     getEntries({ product: slug }).catch(() => []),
   ]);
-  const soldOut = product.units <= 0;
+  const pending = isDropPending(product);
+  let soldOut = !pending && product.units <= 0;
 
   view.innerHTML = `
     <div data-theme="paper">
@@ -40,10 +48,17 @@ export async function render(view, ctx) {
           <p class="product-price">${priceHtml(product)}</p>
           ${product.description ? `<p class="product-desc">${esc(product.description)}</p>` : ''}
 
+          ${pending ? `
+          <div class="drop-box" data-drop>
+            <div data-countdown></div>
+            ${product.botId ? `<a class="btn btn--block btn--ghost" href="${BOT_URL}?startapp=drop_${product.botId}"
+              target="_blank" rel="noopener">Уведомить меня в Telegram</a>` : ''}
+          </div>` : ''}
+
           <form class="product-form" data-buy-form novalidate>
             <div data-size-selector></div>
-            <button type="submit" class="btn btn--block" data-add-cart ${soldOut ? 'disabled' : ''}>
-              ${soldOut ? 'Нет в наличии' : 'В корзину'}
+            <button type="submit" class="btn btn--block" data-add-cart ${soldOut || pending ? 'disabled' : ''}>
+              ${buttonLabel(product)}
             </button>
             <p class="form-error" data-buy-error role="alert"></p>
           </form>
@@ -77,15 +92,42 @@ export async function render(view, ctx) {
 
   const errorEl = view.querySelector('[data-buy-error]');
   const addBtn = view.querySelector('[data-add-cart]');
-  const sizeSelector = mountSizeSelector(view.querySelector('[data-size-selector]'), {
-    sizes: soldOut ? product.sizes.map((s) => ({ ...s, quantity: 0 })) : product.sizes,
-    selected: query.size, // arriving from the showroom rail with a size picked
-    onChange: () => (errorEl.textContent = ''),
-  });
+  const mountSizes = () =>
+    mountSizeSelector(view.querySelector('[data-size-selector]'), {
+      sizes: soldOut || isDropPending(product) ? product.sizes.map((s) => ({ ...s, quantity: 0 })) : product.sizes,
+      selected: query.size, // arriving from the showroom rail with a size picked
+      onChange: () => (errorEl.textContent = ''),
+    });
+  let sizeSelector = mountSizes();
+
+  // Drop: count down, then go on sale in place. Stock and the final word
+  // come from the server, so refetch at zero (and retry if its clock is
+  // a moment behind ours).
+  if (pending) {
+    const dropBox = view.querySelector('[data-drop]');
+    let retry;
+    const open = async () => {
+      const fresh = await getProductBySlug(slug).catch(() => null);
+      if (!fresh || fresh.dropState === 'soon') {
+        retry = setTimeout(open, 2000);
+        return;
+      }
+      product = fresh;
+      soldOut = product.units <= 0;
+      dropBox.classList.add('is-open');
+      dropBox.querySelector('[data-countdown]').innerHTML = `<p class="drop-count-label mono">${soldOut ? 'Изъято' : 'В продаже'}</p>`;
+      dropBox.querySelector('a')?.remove();
+      sizeSelector = mountSizes();
+      addBtn.disabled = soldOut;
+      addBtn.textContent = buttonLabel(product);
+    };
+    onLeave(mountDropCountdown(dropBox.querySelector('[data-countdown]'), product, { onOpen: open }));
+    onLeave(() => clearTimeout(retry));
+  }
 
   view.querySelector('[data-buy-form]').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (soldOut) return;
+    if (soldOut || isDropPending(product)) return;
     const size = sizeSelector.get();
     if (!size) {
       errorEl.textContent = 'Выберите размер.';

@@ -105,6 +105,10 @@ class Product(models.Model):
         null=True, blank=True,
         help_text='Drop soon: sales open at this moment. Empty = «скоро» without a date.',
     )
+    bot_product_id = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='Same item in the Telegram mini app. «Уведомить меня» opens @mrak8_shop_bot at drop_<id>.',
+    )
     measurements = models.JSONField(
         default=dict, blank=True,
         help_text='Flat measurements in cm, e.g. {"circumference_cm": 46, "height_cm": 21}.',

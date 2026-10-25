@@ -60,7 +60,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'code', 'color', 'category', 'collection',
             'price', 'original_price', 'currency', 'is_featured', 'is_new', 'is_sold_out',
             'images', 'inventory', 'cutout_front', 'cutout_back',
-            'drop_at', 'drop_state', 'server_time',
+            'drop_at', 'drop_state', 'server_time', 'bot_product_id',
         )
 
     def get_currency(self, obj):
