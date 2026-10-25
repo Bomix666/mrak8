@@ -23,7 +23,8 @@ const done = (a, ms) => Promise.race([a.finished.catch(() => {}), wait(ms)]);
 
 /** Short buzz where the device has one — the site's stand-in for Telegram haptics. */
 export function buzz(pattern = 12) {
-  if (!reduced) navigator.vibrate?.(pattern);
+  // Before the first tap Chrome refuses vibrate and logs an error for it.
+  if (!reduced && navigator.userActivation?.hasBeenActive !== false) navigator.vibrate?.(pattern);
 }
 
 export function shake(el, px = 4) {

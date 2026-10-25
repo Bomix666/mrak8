@@ -137,7 +137,9 @@ function onLinkClick(e) {
   e.preventDefault();
   const next = pathname + link.search;
   if (next === stripBase(window.location.pathname) + window.location.search) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // CSS scroll-behavior doesn't reach a scripted scroll, so ask here.
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' });
     return;
   }
   navigate(next);
