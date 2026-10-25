@@ -328,6 +328,96 @@
   font-size: 2rem;
 }
 
+.cart-kicker {
+  display: block;
+  margin-top: var(--s-3);
+  color: var(--muted);
+  font-size: var(--t-mono);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+}
+
+/* evidence bag zip: the pull runs across the teeth when the bag is sealed */
+.zip {
+  position: relative;
+  height: 14px;
+  margin: 0 var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.zip__teeth {
+  position: absolute;
+  inset: 4px 0;
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 2px, transparent 2px 5px);
+}
+
+.zip__pull {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 22px;
+  height: 14px;
+  background: var(--ink);
+  border-radius: 3px;
+  transition: transform 420ms var(--ease-in-out);
+}
+
+.cart-drawer.is-sealed .zip__pull {
+  transform: translateX(calc(-1 * (min(460px, 100vw) - var(--s-5) * 2 - 22px)));
+}
+
+.cart-line-n {
+  color: var(--muted);
+}
+
+/* returning an item: red marker strike across the row */
+.cart-line {
+  position: relative;
+}
+
+.cart-line::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 50%;
+  height: 3px;
+  background: var(--mrak-red);
+  border-radius: 2px;
+  transform: scaleX(0) rotate(-1.5deg);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.cart-line.is-struck::after {
+  transform: scaleX(1) rotate(-1.5deg);
+  transition: transform 300ms var(--ease-in-out);
+}
+
+.cart-line.is-struck .cart-line-info,
+.cart-line.is-struck .cart-line-media {
+  opacity: 0.45;
+  transition: opacity var(--d-fast) 260ms;
+}
+
+.cart-empty-bag {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 140px;
+  border: 1px solid var(--line-strong);
+  border-top-width: 6px;
+  border-radius: 0 0 10px 10px;
+  color: var(--muted);
+  font-size: var(--t-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.cart-empty-sub {
+  color: var(--muted);
+}
+
 .cart-body {
   flex: 1;
   overflow-y: auto;
@@ -343,9 +433,10 @@
 }
 
 .cart-empty p {
+  margin: var(--s-4) 0 0;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 3rem;
+  font-size: 2.6rem;
   line-height: 0.88;
   text-transform: uppercase;
 }
@@ -443,6 +534,10 @@
   border-top: 1px solid var(--line-strong);
   display: grid;
   gap: var(--s-4);
+}
+
+.cart-foot[hidden] {
+  display: none;
 }
 
 .cart-total {
